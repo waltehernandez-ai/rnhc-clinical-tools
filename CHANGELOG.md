@@ -1,5 +1,17 @@
 # Changelog
 
+## [2026-03-16] avs-smartphrase.html v1.0
+- Added AVS SmartPhrase Excel Generator to ClinForge
+- Form-based entry with drag-to-reorder locations and section dividers
+- Paste mode with auto-parsing of structured text
+- Live preview mirroring Epic paste formatting
+- ExcelJS in-browser .xlsx generation (no server)
+- Epic-safe formatting: bold, italic, blue phones, gray section dividers, 2-column layout
+- Reference tab with Epic paste workflow and build standards
+
+## [2026-03-16] index.html
+- Added AVS SmartPhrase Excel Generator card to Available Tools section
+
 ## [2026-03-16] nabla-setup.html v2.0
 - Added Nabla Setup Tool to ClinForge
 - Note Style Analyzer: paste de-identified notes, AI detects documentation patterns
