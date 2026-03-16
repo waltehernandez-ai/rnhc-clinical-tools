@@ -503,9 +503,9 @@ strong { font-weight: 600; }
   color: var(--text-tertiary);
 }
 
-/* === COMPONENTS: Panels (tab content) === */
-.panel { display: none; }
-.panel.active { display: block; animation: fadeIn 200ms var(--ease); }
+/* === COMPONENTS: Tab panels (tab content) === */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeIn 200ms var(--ease); }
 
 /* === ANIMATIONS === */
 @keyframes fadeIn {
