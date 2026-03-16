@@ -1,0 +1,255 @@
+<!--
+  ClinForge Tool Metadata
+  Name: Nabla Setup Tool
+  Version: v2.0
+  Date: 2026-03-16
+  Risk Tier: LOW
+  Sources: Nabla Copilot (personal verification), Anthropic API
+  Confidence: CURRENT
+  Last Verified: 2026-03-16
+  Verified Via: Personal clinical use
+  Note: This is a configuration/productivity tool, not a clinical decision tool.
+        No clinical values, drug dosing, or diagnostic thresholds are present.
+        Risk tier LOW assigned because output is documentation instructions,
+        not patient-facing clinical content.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Nabla Setup Tool — ClinForge clinical documentation configuration tool">
+<meta name="author" content="Walter Hernandez, MSN, MPH, FNP-C">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+<title>Nabla Setup Tool — ClinForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#163B5C;--navy-deep:#0E2640;--teal:#0B7A7D;--teal-light:#E0F7F6;--green:#1B7A3D;--green-light:#E3F4E8;--orange:#C65100;--orange-light:#FFF0E0;--red:#A12B2B;--red-light:#FDEAEA;--purple:#5B2C8A;--purple-light:#F0E6F9;--amber:#B8860B;--amber-light:#FFF8E1;--bg:#F8F9FB;--surface:#FFFFFF;--text:#1A1A2E;--text-mid:#4A4A5A;--text-light:#7A7A8A;--border:#E2E4EA;--font:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);font-size:0.9rem;line-height:1.6;color:var(--text);background:var(--bg);min-height:100vh}
+.app-wrap{max-width:680px;margin:0 auto;padding:24px 16px 64px}
+.page-header{text-align:center;margin-bottom:32px}
+.eyebrow{font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-light);margin-bottom:8px}
+.page-header h1{font-size:2rem;font-weight:700;line-height:1.2;color:var(--navy-deep);margin-bottom:8px}
+.subtitle{font-size:0.9rem;color:var(--text-mid);max-width:460px;margin:0 auto}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font);font-size:0.85rem;font-weight:600;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--navy);color:#fff}.btn-primary:hover{background:var(--navy-deep)}.btn-primary:disabled{background:var(--border);color:var(--text-light);cursor:not-allowed}
+.btn-teal{background:var(--teal);color:#fff}.btn-teal:hover{background:#096668}
+.btn-ghost{background:transparent;color:var(--teal);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--teal);background:var(--teal-light)}
+.btn-sm{padding:6px 12px;font-size:0.78rem}
+.btn-danger{background:var(--red-light);color:var(--red)}.btn-danger:hover{background:#f5d0d0}
+.nav-back{font-size:0.85rem;font-weight:600;color:var(--teal);cursor:pointer;padding:0;background:none;border:none;font-family:var(--font)}.nav-back:hover{color:var(--navy)}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text);margin-bottom:4px}
+.form-input,.form-textarea,.form-select{width:100%;font-family:var(--font);font-size:0.9rem;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);transition:border-color .15s}
+.form-input:focus,.form-textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(11,122,125,.1)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-input-mono{font-family:var(--mono);font-size:0.85rem}
+.radio-group{display:flex;flex-direction:column;gap:4px}
+.radio-option{display:flex;align-items:flex-start;gap:12px;padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.radio-option:hover{background:var(--bg);border-color:var(--border)}
+.radio-option input[type="radio"]{margin-top:2px;width:16px;height:16px;accent-color:var(--teal);flex-shrink:0}
+.radio-label{font-size:0.9rem;font-weight:500;color:var(--text)}
+.radio-desc{font-size:0.78rem;color:var(--text-light);margin-top:2px}
+.q-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+.q-title{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:8px}
+.alert{padding:12px 16px;border-radius:8px;font-size:0.85rem;margin-bottom:16px;border-left:4px solid}
+.alert-info{background:var(--teal-light);border-color:var(--teal);color:var(--teal)}
+.alert-warn{background:var(--orange-light);border-color:var(--orange);color:var(--orange)}
+.alert-danger{background:var(--red-light);border-color:var(--red);color:var(--red)}
+.alert-success{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.alert-purple{background:var(--purple-light);border-color:var(--purple);color:var(--purple)}
+.output-block{margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.output-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--navy-deep);color:#fff}
+.output-title{font-size:0.85rem;font-weight:600}
+.output-body{padding:16px;background:var(--bg);font-family:var(--mono);font-size:0.82rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--text)}
+.settings-table{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:0.78rem}
+.st-label{font-weight:600;color:var(--amber)}.st-value{font-family:var(--mono);font-size:0.75rem;color:var(--text)}
+.progress-wrap{margin-bottom:24px}
+.progress-steps{display:flex;justify-content:space-between;margin-bottom:8px}
+.step-label{font-size:0.78rem;font-weight:600;color:var(--text-light);cursor:pointer;padding-bottom:4px;border-bottom:2px solid transparent;transition:all .15s}
+.step-label.active{color:var(--teal);border-bottom-color:var(--teal)}.step-label.done{color:var(--navy)}
+.progress-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:var(--teal);border-radius:4px;transition:width .4s ease}
+.history-entry{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.history-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);cursor:pointer}
+.history-header:hover{background:#f0f1f4}
+.history-body{padding:16px;border-top:1px solid var(--border);display:none}
+.history-entry.open .history-body{display:block}
+.advisor-wrap{border:1px solid var(--purple);border-radius:12px;overflow:hidden;margin-bottom:24px}
+.advisor-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--purple);color:#fff;font-size:0.85rem;font-weight:600}
+.advisor-body{padding:12px;background:var(--surface)}
+.advisor-rec{padding:8px 12px;border-radius:8px;margin-bottom:8px;border-left:4px solid;font-size:0.85rem}
+.advisor-rec.avoid{background:var(--red-light);border-color:var(--red);color:var(--red)}
+.advisor-rec.try{background:var(--teal-light);border-color:var(--teal);color:var(--teal)}
+.advisor-rec.worked_well{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.advisor-rec.watch{background:var(--amber-light);border-color:var(--amber);color:var(--amber)}
+.rec-type{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;opacity:0.7;margin-bottom:2px}
+.rec-title{font-weight:600}.rec-detail{font-size:0.78rem;opacity:0.85;margin-top:2px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--surface);border-radius:16px;padding:32px;max-width:480px;width:100%;box-shadow:0 24px 48px rgba(0,0,0,.15)}
+.mode-card{display:flex;align-items:flex-start;gap:16px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;text-align:left;font-family:var(--font);transition:all .15s}
+.mode-card:hover{border-color:var(--teal);box-shadow:0 2px 8px rgba(11,122,125,.08)}
+.mode-card.featured{border:2px solid var(--teal)}
+.mode-icon{font-size:2rem;flex-shrink:0}
+.mode-name{font-size:0.9rem;font-weight:700;color:var(--text)}
+.mode-badge{display:inline-block;font-size:0.7rem;font-weight:600;background:var(--teal-light);color:var(--teal);padding:2px 8px;border-radius:12px;margin-left:8px;vertical-align:middle}
+.mode-desc{font-size:0.85rem;color:var(--text-mid);margin-top:4px}
+.mode-sub{font-size:0.78rem;color:var(--text-light);margin-top:4px}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mode-grid .mode-card{flex-direction:column;gap:4px}.mode-grid .mode-icon{font-size:1.5rem}
+.bookmark-banner{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 16px;text-align:center;margin-bottom:24px;font-size:0.78rem;color:var(--text-mid)}
+.bookmark-banner strong{color:var(--text)}
+.toast{display:none;position:fixed;bottom:24px;right:24px;padding:10px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.15);font-family:var(--font)}
+.toast.success{background:var(--green);color:#fff}.toast.error{background:var(--red);color:#fff}.toast.show{display:block}
+.footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--border);text-align:center}
+.disclaimer{font-size:0.75rem;line-height:1.5;color:var(--text-light);max-width:560px;margin:0 auto}
+.disclaimer strong{color:var(--text-mid);font-weight:600}
+.version-line{font-size:0.75rem;color:var(--text-light);margin-top:12px;cursor:pointer}
+.version-line:hover{color:var(--text-mid)}
+.changelog{display:none;text-align:left;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px;max-width:480px;margin-left:auto;margin-right:auto}
+.changelog.open{display:block}
+.changelog p{font-size:0.75rem;color:var(--text-light);margin-bottom:4px}
+.changelog p:first-child{color:var(--text-mid);font-weight:500}
+.flex{display:flex}.flex-between{display:flex;justify-content:space-between;align-items:center}.flex-center{display:flex;align-items:center;justify-content:center}
+.gap-8{gap:8px}.gap-12{gap:12px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}.mb-8{margin-bottom:8px}.mb-16{margin-bottom:16px}.mb-24{margin-bottom:24px}
+.text-center{text-align:center}.text-sm{font-size:0.78rem}.text-xs{font-size:0.75rem}.text-light{color:var(--text-light)}.text-mid{color:var(--text-mid)}.text-bold{font-weight:600}
+@media(max-width:480px){.app-wrap{padding:16px 12px 48px}.page-header h1{font-size:1.5rem}.mode-grid{grid-template-columns:1fr}.progress-steps .step-label{font-size:0.7rem}.settings-table{grid-template-columns:1fr;gap:2px}.st-label{margin-top:4px}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+</style>
+</head>
+<body>
+<div class="app-wrap" id="app"></div>
+<div class="modal-overlay" id="apiKeyModal">
+  <div class="modal-box">
+    <div style="font-size:2rem;margin-bottom:12px">🔑</div>
+    <h2 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep);margin-bottom:8px">Anthropic API Key</h2>
+    <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:16px">The Analyzer, Troubleshooter, and Pattern Advisor use Claude to process your input. Enter your Anthropic API key to enable these features.</p>
+    <div class="alert alert-info" style="margin-bottom:16px">Your key stays in this browser only. It is sent directly to Anthropic's API via HTTPS — never to any other server. <a href="https://console.anthropic.com/" target="_blank" rel="noopener" style="color:var(--navy);font-weight:600">Get a key →</a></div>
+    <div class="form-group"><input type="password" id="apiKeyInput" class="form-input form-input-mono" placeholder="sk-ant-api03-..." autocomplete="off"></div>
+    <div class="flex gap-8">
+      <button class="btn btn-primary" onclick="saveApiKey()">Save Key</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+    <p class="text-xs text-light mt-8">Stored in localStorage. Use "API Key" button from home to clear it.</p>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const VERSION="2.0.0";
+const CHANGELOG=["2.0.0 — Standalone HTML for GitHub Pages. ClinForge design system. BYOK with direct browser CORS. Library removed.","1.3.0 — Removed hallucination-prone web refresh; manually curated only.","1.2.0 — Pattern Advisor, output history with ratings, section troubleshooter.","1.1.0 — Note analyzer mode, Results/Background memory workaround.","1.0.0 — Initial release: questionnaire builder, static library."];
+const SK={history:"nabla:history",apiKey:"nabla:apikey"};
+function loadH(){try{const h=localStorage.getItem(SK.history);return h?JSON.parse(h):[]}catch{return[]}}
+function saveH(h){try{localStorage.setItem(SK.history,JSON.stringify(h))}catch{}}
+function getKey(){try{return localStorage.getItem(SK.apiKey)||""}catch{return""}}
+function setKey(k){try{localStorage.setItem(SK.apiKey,k)}catch{}}
+function clrKey(){try{localStorage.removeItem(SK.apiKey)}catch{}}
+let S={view:"landing",qStep:0,form:blankF(),history:loadH(),advRecs:null,advLoading:false,advOff:false,
+noteText:"",aName:"",aCreds:"",aSpec:"",analyzing:false,aResult:null,aInstr:null,
+tsSection:"",tsInstr:"",tsProblem:"",tsing:false,tsResult:null,qSaved:false,aSaved:false};
+function blankF(){return{providerName:"",credentials:"",specialty:"",stylePreference:"",pronounPreference:"",articlePreference:"",abbreviationLevel:"",customAbbreviations:"",reasoningStyle:"",customReasoningSymbol:"",nameHandling:"",hpiStructure:"",hpiStableApproach:"",hpiCustomStable:"",hpiDeniesStyle:"",hpiPlanInclusion:"",hpiDiagnosticInclusion:"",hpiHistoryInclusion:"",hpiROSPlacement:"",hpiDetailLevel:"",hpiOtherPrefs:"",peDocApproach:"",peNormalHandling:"",peFormat:"",peCustomFormat:"",peOmitUnexamined:"",peSeparateFromLabs:"",peAbbreviationStyle:"",peCustomAbbreviations:"",peOtherPrefs:"",apLeadSentence:"",apCustomLead:"",apProblemFormat:"",apCustomProblemFormat:"",apTrendTracking:"",apBulletStyle:"",apReasoningInPlan:"",apSafetyNet:"",apCustomSafetyNet:"",apConsolidation:"",apDateFormat:"",apDuplication:"",apDifferentialDx:"",apOtherPrefs:"",resultsUse:"",resultsCaseSummary:"",resultsPriorContext:"",resultsTenseRule:"",resultsLength:"",resultsOtherPrefs:""}}
+// API
+async function callAI(sys,usr,mt=2000){
+  const k=getKey();if(!k){openModal();throw new Error("API key required")}
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":k,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:mt,system:sys,messages:[{role:"user",content:usr}]})});
+  if(!r.ok){if(r.status===401){clrKey();openModal();throw new Error("Invalid API key")}throw new Error("API error "+r.status)}
+  const d=await r.json();const t=(d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
+  if(!t)throw new Error("Empty response");const c=t.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+  try{return JSON.parse(c)}catch{return{raw:t}}}
+const P_ADV=`You are a Nabla Copilot instruction advisor. Analyze past generated instruction sets and feedback.\nReturn ONLY a JSON array (no markdown, no backticks) of 3-6 objects:\n[{"type":"avoid"|"try"|"worked_well"|"watch","section":"General"|"HPI"|"PE"|"A&P"|"Results"|"All","title":"<5-8 words>","detail":"<1-2 sentences based on past feedback>"}]\nBase ONLY on evidence from past outputs. Do not fabricate.`;
+const P_ANA=`You are a clinical documentation analyst. Analyze note excerpts (PHI removed). Return ONLY JSON (no markdown, no backticks):\n{"confidence":"high"|"medium"|"low","noteCount":0,"specialty_clues":"","stylePreference":"telegraphic"|"concise_prose"|"full_prose","pronounPreference":"exclude_all"|"exclude_gendered"|"allow","articlePreference":"remove"|"keep","abbreviationLevel":"heavy"|"moderate"|"minimal","detectedAbbreviations":"","reasoningStyle":"symbol"|"prose"|"none","reasoningSymbol":"","nameHandling":"exclude"|"first_only"|"default","hpiStructure":"problem_headers"|"chronological"|"system_based"|"soap_traditional","hpiStableApproach":"one_liner"|"full_narrative"|"skip","hpiDeniesStyle":"no_x"|"denies"|"pertinent_neg_list","hpiPlanInclusion":"exclude"|"include","hpiDiagnosticInclusion":"yes"|"separate","hpiHistoryInclusion":"yes"|"separate","hpiROSPlacement":"end_of_hpi"|"separate"|"integrated","peDocApproach":"verbalized_only"|"baseline_normals"|"template_override","peNormalHandling":"never_wnl"|"wnl_examined","peFormat":"system_colon"|"narrative"|"bullets","peOmitUnexamined":"yes"|"no","peSeparateFromLabs":"yes"|"no","peAbbreviationStyle":"standard"|"spell_out","peAbbreviations":"","apLeadSentence":"full_summary"|"brief"|"none","apProblemFormat":"caps_trend"|"numbered"|"bold_headers"|"other","apTrendTracking":"in_header"|"in_body"|"none","apBulletStyle":"dash"|"number"|"narrative","apConsolidation":"yes"|"no","apReasoningInPlan":"yes"|"no","apSafetyNet":"every_block"|"end_of_note"|"none","apDateFormat":"m_d_yy"|"mm_dd_yyyy"|"yyyy_mm_dd"|"mixed","apDuplication":"no"|"ok","uncertainItems":[]}`;
+const P_TS=`You are a Nabla Copilot instruction troubleshooter. Return ONLY JSON (no markdown, no backticks):\n{"diagnosis":"<1-2 sentences>","fixes":["<specific changes>"],"revisedInstructions":"<complete revised block, numbered, starting with 'Follow each instruction below in order.'>","uiSettingCheck":"<UI toggle to check or null>"}`;
+// Modal
+function openModal(){document.getElementById("apiKeyInput").value=getKey();document.getElementById("apiKeyModal").classList.add("open")}
+function closeModal(){document.getElementById("apiKeyModal").classList.remove("open")}
+function saveApiKey(){const v=document.getElementById("apiKeyInput").value.trim();if(!v)return;setKey(v);closeModal();toast("API key saved","success")}
+// Toast
+function toast(m,t="success"){const el=document.getElementById("toast");el.textContent=m;el.className=`toast ${t} show`;setTimeout(()=>el.classList.remove("show"),2500)}
+// Clipboard
+function cp(text,label){try{if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text).then(()=>toast(label?"Copied: "+label:"Copied!"),()=>cpFb(text,label))}else cpFb(text,label)}catch{cpFb(text,label)}}
+function cpFb(text,label){try{const ta=document.createElement("textarea");ta.value=text;ta.style.cssText="position:fixed;left:-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);toast(label?"Copied: "+label:"Copied!")}catch{toast("Copy failed — select text manually","error")}}
+// Instruction builders
+function num(label,lines){const f=lines.filter(Boolean);if(!f.length)return`// No preferences set for ${label}.`;return"Follow each instruction below in order.\n"+f.map((l,i)=>`${i+1}. ${l}`).join("\n")}
+function bGen(s){const L=[];if(s.providerName||s.credentials||s.specialty)L.push(`Provider: ${[s.providerName,s.credentials].filter(Boolean).join(" ")||"[Name]"}. ${s.specialty?s.specialty+".":""}`);if(s.stylePreference==="telegraphic")L.push("Use telegraphic style. Short fragments, no filler words.");if(s.stylePreference==="concise_prose")L.push("Use concise prose. Short complete sentences.");if(s.stylePreference==="full_prose")L.push("Use full narrative prose.");if(s.pronounPreference==="exclude_all")L.push('No pronouns. Never write "he," "she," "patient," or "they." Start with condition or finding.');if(s.pronounPreference==="exclude_gendered")L.push('No gendered pronouns. "Patient" and "they" acceptable.');if(s.pronounPreference==="allow")L.push("Standard pronoun use is fine.");if(s.stylePreference==="telegraphic"&&s.articlePreference==="remove")L.push("Remove articles (a, an, the).");if(s.abbreviationLevel==="heavy")L.push(`Use abbreviations freely${s.customAbbreviations?": "+s.customAbbreviations:""}. Include standard medical abbreviations.`);if(s.abbreviationLevel==="moderate")L.push("Use standard medical abbreviations only (HTN, DM, CBC, etc.).");if(s.abbreviationLevel==="minimal")L.push("Minimize abbreviations.");if(s.reasoningStyle==="symbol")L.push(`Use "${s.customReasoningSymbol||">>"}" to mark clinical reasoning.`);if(s.reasoningStyle==="prose")L.push("Express clinical reasoning in prose.");if(s.reasoningStyle==="none")L.push("No clinical reasoning. Decisions only.");if(s.nameHandling==="exclude")L.push("No patient names. Age and sex only.");if(s.nameHandling==="first_only")L.push("Patient first name only.");return num("General",L)}
+function bHPI(s){const L=[];if(s.hpiStructure==="problem_headers")L.push('"[Problem]:" header then narrative. Blank line between.');if(s.hpiStructure==="chronological")L.push("Single chronological narrative. Most recent first.");if(s.hpiStructure==="system_based")L.push("Organize by organ system with headers.");if(s.hpiStructure==="soap_traditional")L.push("Traditional SOAP HPI.");if(s.hpiStableApproach==="one_liner")L.push('Stable: one-liner. "HTN: Controlled on lisinopril 10 mg."');if(s.hpiStableApproach==="full_narrative")L.push("Full narrative for all problems.");if(s.hpiStableApproach==="skip")L.push("Omit stable problems.");if(s.hpiDeniesStyle==="no_x")L.push('"No [symptom]" not "denies."');if(s.hpiDeniesStyle==="denies")L.push('"Denies [symptom]" is acceptable.');if(s.hpiDeniesStyle==="pertinent_neg_list")L.push("Pertinent negatives at end of each cluster.");if(s.hpiPlanInclusion==="exclude")L.push("Exclude plan from HPI.");if(s.hpiPlanInclusion==="include")L.push("Include plan items in HPI.");if(s.hpiDiagnosticInclusion==="yes")L.push("Include labs/imaging in HPI.");if(s.hpiDiagnosticInclusion==="separate")L.push("Keep diagnostics separate.");if(s.hpiHistoryInclusion==="yes")L.push("Include PMH/surgical/social in HPI.");if(s.hpiHistoryInclusion==="separate")L.push("Keep history separate.");if(s.hpiROSPlacement==="end_of_hpi")L.push("ROS at end of HPI.");if(s.hpiROSPlacement==="separate")L.push("ROS as own section.");if(s.hpiROSPlacement==="integrated")L.push("Integrate ROS per problem.");if(s.hpiOtherPrefs)L.push(s.hpiOtherPrefs);return num("HPI",L)}
+function bPE(s){const L=[];if(s.peDocApproach==="verbalized_only")L.push("Document ONLY verbalized findings. Never fabricate or assume.");if(s.peDocApproach==="baseline_normals")L.push("Baseline normals + verbalized abnormals.");if(s.peDocApproach==="template_override")L.push("Use dot phrase template. Add verbalized abnormals.");if(s.peDocApproach!=="baseline_normals"&&s.peNormalHandling==="never_wnl")L.push('No assumed normals, "WNL," or inferred findings.');if(s.peNormalHandling==="wnl_examined")L.push('"WNL" only for explicitly examined systems.');if(s.peFormat==="system_colon")L.push('"[SYSTEM]: [finding]." One line per system.');if(s.peFormat==="narrative")L.push("Narrative paragraph format.");if(s.peFormat==="bullets")L.push("Bullet points per system.");if(s.peOmitUnexamined==="yes")L.push("Omit unexamined systems.");if(s.peSeparateFromLabs==="yes")L.push("PE = hands/eyes/ears only. NEVER include labs or imaging.");if(s.peOtherPrefs)L.push(s.peOtherPrefs);return num("Physical Exam",L)}
+function bAP(s){const L=[];if(s.apLeadSentence==="full_summary")L.push("One-sentence summary: age, sex, conditions, visit purpose, findings, orders.");if(s.apLeadSentence==="brief")L.push("Brief opener: age, sex, visit reason.");if(s.apLeadSentence==="none")L.push("No summary. Start with problem list.");if(s.apProblemFormat==="caps_trend")L.push('"# PROBLEM, TREND (values, date)" in caps.');if(s.apProblemFormat==="numbered")L.push("Numbered problem headings.");if(s.apProblemFormat==="bold_headers")L.push("Bold headers. Status in parentheses.");if(s.apTrendTracking==="in_header")L.push("Trend + values in header.");if(s.apTrendTracking==="in_body")L.push("Trend in body, not header.");if(s.apTrendTracking==="none")L.push("No trend labels.");if(s.apConsolidation==="yes")L.push("Consolidate related problems.");if(s.apConsolidation==="no")L.push("Keep each diagnosis separate.");if(s.apBulletStyle==="dash")L.push("Dash bullets for plan.");if(s.apBulletStyle==="number")L.push("Numbered plan items.");if(s.apBulletStyle==="narrative")L.push("Narrative prose for plan.");if(s.apReasoningInPlan==="yes")L.push("Include reasoning per problem.");if(s.apReasoningInPlan==="no")L.push("No reasoning. Decisions only.");if(s.apSafetyNet==="every_block")L.push("ER precautions per problem.");if(s.apSafetyNet==="end_of_note")L.push("Single safety-net section at end.");if(s.apDateFormat==="m_d_yy")L.push("Dates: M/D/YY.");if(s.apDateFormat==="mm_dd_yyyy")L.push("Dates: MM/DD/YYYY.");if(s.apDateFormat==="yyyy_mm_dd")L.push("Dates: YYYY-MM-DD.");if(s.apDuplication==="no")L.push("No duplication across problems.");if(s.apOtherPrefs)L.push(s.apOtherPrefs);return num("Assessment & Plan",L)}
+function bRes(s){if(s.resultsUse!=="yes")return"// Results section not configured.";const L=[];if(s.resultsCaseSummary==="yes")L.push('Generate "CASE SUMMARY:" paragraph.');if(s.resultsPriorContext==="yes"){L.push('Generate "PRIOR VISIT CONTEXT ([date]):" section.');L.push("First line: age, sex, problems, purpose.");L.push("One line per problem: name, action, values, meds, trend.");if(s.resultsTenseRule==="past")L.push('Past tense: "was started on," "was ordered."');L.push("Only verbalized/pasted content. Do not fabricate.");if(s.resultsLength==="3_8")L.push("Target 3–8 lines.");if(s.resultsLength==="1_3")L.push("Target 1–3 lines.");if(s.resultsLength==="flexible")L.push("Length flexible.")}if(s.resultsOtherPrefs)L.push(s.resultsOtherPrefs);return num("Results",L)}
+function mkGen(s){return{"General custom instructions":bGen(s),"HPI custom instructions":bHPI(s),"Physical Exam custom instructions":bPE(s),"Assessment & Plan custom instructions":bAP(s),"Results custom instructions":bRes(s)}}
+function mkUI(s){return{HPI:`Style = Paragraph | Detail = ${s.hpiDetailLevel==="high"?"High":"Normal"} | Split by problem = ${s.hpiStructure==="problem_headers"?"ON":"OFF"}`,"Physical Exam":"Style = Auto","Assessment & Plan":`Style = Paragraph | Split by Epic visit diagnoses = ON | Include differential = ${s.apDifferentialDx==="yes"?"ON":"OFF"}`,Results:s.resultsUse==="yes"?'Title → "Background" | Style = Auto | Hide section = ON':null}}
+// Escape
+function e(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+// Global cache for copy buttons
+let GC={};let tsRev="";
+// ── RENDER ──
+function R(){const a=document.getElementById("app");switch(S.view){case"landing":a.innerHTML=rLand();break;case"questionnaire":a.innerHTML=rQ();break;case"analyzer":a.innerHTML=rAna();break;case"troubleshooter":a.innerHTML=rTs();break;case"history":a.innerHTML=rHist();break}}
+function go(v){S.view=v;S.qStep=0;S.form=blankF();S.qSaved=false;S.aSaved=false;S.aResult=null;S.aInstr=null;S.tsResult=null;S.advOff=false;S.noteText="";S.aName="";S.aCreds="";S.aSpec="";S.tsSection="";S.tsInstr="";S.tsProblem="";R();window.scrollTo(0,0)}
+// ── LANDING ──
+function rLand(){const hk=!!getKey();return`
+<div class="page-header"><div class="eyebrow">ClinForge</div><h1>Nabla Setup Tool</h1><p class="subtitle">Generate custom instructions that make Nabla write notes the way you already do.</p></div>
+<div class="bookmark-banner"><strong>Bookmark this page.</strong> History and API key live in this browser's storage only. Different browser or device = fresh start.</div>
+<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+<button class="mode-card featured" onclick="go('analyzer')"><div class="mode-icon">📋</div><div><span class="mode-name">Analyze My Notes<span class="mode-badge">Recommended</span></span><div class="mode-desc">Paste 3–5 de-identified notes. AI reads your patterns and generates matching instructions.</div><div class="mode-sub">Best for: initial setup, showing vs telling.</div></div></button>
+<button class="mode-card" onclick="go('questionnaire')"><div class="mode-icon">✏️</div><div><span class="mode-name">Build from Scratch</span><div class="mode-desc">Step-by-step questionnaire. ~5 min.</div><div class="mode-sub">Best for: power users, starting from zero.</div></div></button>
+<button class="mode-card" onclick="go('troubleshooter')"><div class="mode-icon">🔧</div><div><span class="mode-name">Fix a Section</span><div class="mode-desc">Paste current instructions + describe the problem. AI suggests a fix.</div><div class="mode-sub">Best for: "my PE keeps making things up."</div></div></button>
+</div>
+<div class="mode-grid mb-24">
+<button class="mode-card" onclick="go('history')"><div class="mode-icon">📁</div><span class="mode-name">History</span><div class="mode-desc text-xs text-light">${S.history.length} saved</div></button>
+<button class="mode-card" onclick="${hk?"mngKey()":"openModal()"}"><div class="mode-icon">🔑</div><span class="mode-name">API Key</span><div class="mode-desc text-xs text-light">${hk?"Saved ✓":"Not set"}</div></button>
+</div>${rFoot()}`}
+function mngKey(){if(confirm("Clear your stored API key?")){clrKey();toast("API key cleared");R()}}
+// ── QUESTIONNAIRE ──
+const QS=["General","HPI","PE","A&P","Results","Output"];
+function rQ(){const st=S.qStep,pr=Math.round(st/(QS.length-1)*100);let pg="";
+switch(st){case 0:pg=qGen();break;case 1:pg=qHpi();break;case 2:pg=qPe();break;case 3:pg=qAp();break;case 4:pg=qRes();break;case 5:GC=mkGen(S.form);pg=rOut(GC,mkUI(S.form),"q");break}
+return`<div class="flex-between mb-16"><button class="nav-back" onclick="go('landing')">← All modes</button><span class="text-sm text-light">Build from Scratch</span></div>${rAdv()}<div class="card">
+<div class="progress-wrap"><div class="progress-steps">${QS.map((l,i)=>`<span class="step-label ${i===st?"active":i<st?"done":""}" onclick="gS(${i})">${l}</span>`).join("")}</div><div class="progress-bar"><div class="progress-fill" style="width:${pr}%"></div></div></div>
+${pg}<div class="flex-between mt-24"><button class="btn btn-ghost" onclick="gS(${st-1})" ${st===0?"disabled":""}>← Back</button><button class="btn btn-primary" onclick="gS(${st+1})" ${st===QS.length-1?"disabled":""}>${st===QS.length-2?"Generate →":"Next →"}</button></div></div>${rFoot()}`}
+function gS(i){if(i<0||i>=QS.length)return;S.qStep=i;R();window.scrollTo(0,0)}
+function tf(l,k,ph){return`<div class="form-group"><label class="form-label">${l}</label><input class="form-input" value="${e(S.form[k]||"")}" placeholder="${ph||""}" oninput="uf('${k}',this.value)"></div>`}
+function qb(t,r){return`<div class="q-block"><div class="q-title">${t}</div><div class="radio-group">${r.join("")}</div></div>`}
+function rd(k,v,l,d){return`<label class="radio-option"><input type="radio" name="${k}" value="${v}" ${S.form[k]===v?"checked":""} onchange="uf('${k}','${v}')"><div><span class="radio-label">${l}</span>${d?`<div class="radio-desc">${d}</div>`:""}</div></label>`}
+function uf(k,v){S.form[k]=v;R()}
+function qGen(){const s=S.form;return`<h3 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep);margin-bottom:16px">General Settings</h3>${tf("Provider name","providerName","Jane Smith")}${tf("Credentials","credentials","MD, FNP-C, PA-C")}${tf("Specialty","specialty","Family Medicine")}${qb("Writing style",[rd("stylePreference","telegraphic","Telegraphic","Fragments. Compact."),rd("stylePreference","concise_prose","Concise prose","Short complete sentences."),rd("stylePreference","full_prose","Full narrative","Traditional dictation.")])}${qb("Pronouns",[rd("pronounPreference","exclude_all","No pronouns at all"),rd("pronounPreference","exclude_gendered","No gendered pronouns"),rd("pronounPreference","allow","Standard")])}${qb("Abbreviations",[rd("abbreviationLevel","heavy","Heavy shorthand"),rd("abbreviationLevel","moderate","Standard medical only"),rd("abbreviationLevel","minimal","Minimal")])}${s.abbreviationLevel==="heavy"?tf("Your abbreviations","customAbbreviations","yo, hx, f/u, w/, s/p"):""}${qb("Clinical reasoning",[rd("reasoningStyle","symbol","Use symbol (>>)"),rd("reasoningStyle","prose","Prose"),rd("reasoningStyle","none","Don't include")])}${s.reasoningStyle==="symbol"?tf("Symbol","customReasoningSymbol",">>"):""}`}
+function qHpi(){return`<h3 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep);margin-bottom:16px">HPI</h3>${qb("Structure",[rd("hpiStructure","problem_headers","Problem headers"),rd("hpiStructure","chronological","Chronological"),rd("hpiStructure","system_based","By organ system"),rd("hpiStructure","soap_traditional","Traditional SOAP")])}${qb("Stable problems",[rd("hpiStableApproach","one_liner","One-liner"),rd("hpiStableApproach","full_narrative","Full narrative"),rd("hpiStableApproach","skip","Skip")])}${qb("Negatives style",[rd("hpiDeniesStyle","no_x",'"No [symptom]"'),rd("hpiDeniesStyle","denies",'"Denies [symptom]"'),rd("hpiDeniesStyle","pertinent_neg_list","List at end")])}${qb("ROS placement",[rd("hpiROSPlacement","end_of_hpi","End of HPI"),rd("hpiROSPlacement","separate","Separate section"),rd("hpiROSPlacement","integrated","Integrated per problem")])}`}
+function qPe(){return`<h3 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep);margin-bottom:16px">Physical Exam</h3><div class="alert alert-danger">Nabla can fabricate PE findings for unexamined systems. Choose carefully.</div>${qb("Documentation approach",[rd("peDocApproach","verbalized_only","Verbalized only","Safest."),rd("peDocApproach","baseline_normals","Baseline normals + abnormals"),rd("peDocApproach","template_override","Dot phrase template")])}${qb("Normal handling",[rd("peNormalHandling","never_wnl","Never assume normals"),rd("peNormalHandling","wnl_examined","WNL for examined systems")])}${qb("Format",[rd("peFormat","system_colon","[SYSTEM]: [finding]"),rd("peFormat","narrative","Narrative"),rd("peFormat","bullets","Bullets")])}`}
+function qAp(){return`<h3 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep);margin-bottom:16px">Assessment & Plan</h3>${qb("Lead summary",[rd("apLeadSentence","full_summary","Full summary sentence"),rd("apLeadSentence","brief","Brief opener"),rd("apLeadSentence","none","None")])}${qb("Problem format",[rd("apProblemFormat","caps_trend","# CAPS, TREND"),rd("apProblemFormat","numbered","Numbered"),rd("apProblemFormat","bold_headers","Bold headers")])}${qb("Plan bullets",[rd("apBulletStyle","dash","Dash"),rd("apBulletStyle","number","Numbered"),rd("apBulletStyle","narrative","Prose")])}${qb("Date format",[rd("apDateFormat","m_d_yy","M/D/YY"),rd("apDateFormat","mm_dd_yyyy","MM/DD/YYYY"),rd("apDateFormat","yyyy_mm_dd","YYYY-MM-DD")])}`}
+function qRes(){const s=S.form;return`<h3 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep);margin-bottom:16px">Results — Memory Workaround</h3><div class="alert alert-info">Repurpose Results as a "Prior Visit Context" block to give Nabla memory between visits.</div>${qb("Set up?",[rd("resultsUse","yes","Yes"),rd("resultsUse","no","No")])}${s.resultsUse==="yes"?`${qb("Case summary?",[rd("resultsCaseSummary","yes","Yes"),rd("resultsCaseSummary","no","No")])}${qb("Prior visit context?",[rd("resultsPriorContext","yes","Yes"),rd("resultsPriorContext","no","No")])}${s.resultsPriorContext==="yes"?qb("Length",[rd("resultsLength","3_8","3–8 lines"),rd("resultsLength","1_3","1–3 lines"),rd("resultsLength","flexible","Flexible")]):""}`:""}` }
+// ── OUTPUT (shared) ──
+function rOut(gens,ui,src){const saved=src==="q"?S.qSaved:S.aSaved;const prov=src==="q"?[S.form.providerName,S.form.credentials].filter(Boolean).join(" ")||"Questionnaire":[S.aName,S.aCreds].filter(Boolean).join(" ")||"Analyzer";
+let blocks="";for(const[nm,txt]of Object.entries(gens)){const empty=txt.startsWith("//");blocks+=`<div class="output-block" style="${empty?"opacity:.5":""}"><div class="output-header"><span class="output-title">${nm}</span>${empty?"":`<button class="btn btn-teal btn-sm" onclick="cp(GC['${e(nm)}'],'${e(nm)}')">Copy</button>`}</div><div class="output-body">${e(txt)}</div></div>`}
+let uiR="";for(const[k,v]of Object.entries(ui))if(v)uiR+=`<div class="st-label">${k}</div><div class="st-value">${v}</div>`;
+return`<div class="text-center mb-16"><div style="font-size:2.5rem;margin-bottom:8px">✅</div><h2 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep)">Your Custom Instructions</h2><p class="text-sm text-mid">Copy each block → paste into the matching Nabla section.</p><div class="flex flex-center gap-8 mt-12"><button class="btn btn-primary" onclick="cpAll()">Copy All</button>${saved?`<span class="btn btn-ghost" style="color:var(--green);border-color:var(--green)">✓ Saved</span>`:`<button class="btn btn-teal" onclick="svOut('${src}','${e(prov)}')">💾 Save to History</button>`}</div></div><div class="alert alert-warn"><strong>⚙️ Match these UI settings in Nabla</strong><div class="settings-table mt-8">${uiR}</div></div>${blocks}`}
+function cpAll(){const t=Object.entries(GC).map(([n,t])=>`=== ${n.toUpperCase()} ===\n${t}\n`).join("\n");cp(t,"All sections")}
+function svOut(src,prov){const entry={id:Date.now().toString(),createdAt:new Date().toISOString(),source:src==="q"?"Questionnaire":"Note Analyzer",providerLabel:prov,generators:{...GC},ratings:{},comments:{},overallRating:0};S.history=[entry,...S.history];saveH(S.history);if(src==="q")S.qSaved=true;else S.aSaved=true;R();toast("Saved to history")}
+// ── ANALYZER ──
+function rAna(){if(S.aInstr)return rAnaOut();return`<div class="flex-between mb-16"><button class="nav-back" onclick="go('landing')">← All modes</button><span class="text-sm text-light">Analyze My Notes</span></div>${rAdv()}<div class="card"><div class="text-center mb-16"><div style="font-size:2.5rem;margin-bottom:8px">📋</div><h2 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep)">Note Style Analyzer</h2><p class="text-sm text-mid mt-8">Paste 3–5 de-identified notes.</p></div><div class="alert alert-warn mb-16">Remove all PHI before pasting: names, DOB, MRN, addresses, phone numbers.</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" class="mb-16"><div class="form-group"><label class="form-label" style="font-size:.78rem">Name</label><input class="form-input" value="${e(S.aName)}" oninput="S.aName=this.value"></div><div class="form-group"><label class="form-label" style="font-size:.78rem">Credentials</label><input class="form-input" value="${e(S.aCreds)}" oninput="S.aCreds=this.value"></div><div class="form-group"><label class="form-label" style="font-size:.78rem">Specialty</label><input class="form-input" value="${e(S.aSpec)}" oninput="S.aSpec=this.value"></div></div><div class="form-group"><textarea class="form-textarea form-input-mono" rows="12" placeholder="Paste de-identified note excerpts..." oninput="S.noteText=this.value">${e(S.noteText)}</textarea></div><div class="flex gap-12"><button class="btn btn-primary" onclick="runAna()" ${S.analyzing||!S.noteText.trim()?"disabled":""}>${S.analyzing?"Analyzing...":"Analyze Notes"}</button>${S.analyzing?'<span class="text-sm text-mid" style="align-self:center">Reading patterns...</span>':""}</div></div>${rFoot()}`}
+function rAnaOut(){const r=S.aResult,ins=S.aInstr;GC=ins.gens;const ui=mkUI(ins.state);let cb="";if(r){const c=r.confidence,cl=c==="high"?"alert-success":c==="medium"?"alert-warn":"alert-info",lb=c==="high"?"✓ High":c==="medium"?"◐ Medium":"ℹ Limited";cb=`<div class="alert ${cl}">${lb} confidence · ${r.noteCount||"?"} notes${r.specialty_clues?" · "+r.specialty_clues:""}</div>`;if(r.uncertainItems?.length)cb+=`<div class="alert alert-warn">Uncertain — verify: ${r.uncertainItems.join(", ")}</div>`}
+return`<div class="flex-between mb-16"><button class="nav-back" onclick="go('landing')">← All modes</button><span class="text-sm text-light">Analyze My Notes</span></div><div class="card">${cb}${rOut(GC,ui,"a")}<button class="nav-back mt-16" onclick="rstAna()">← Analyze different notes</button></div>${rFoot()}`}
+async function runAna(){if(!S.noteText.trim())return;S.analyzing=true;R();try{const p=await callAI(P_ANA,`Provider: ${S.aName||"Unknown"} ${S.aCreds}, ${S.aSpec||"Unknown"}\n\n---BEGIN NOTES---\n${S.noteText.trim()}\n---END NOTES---`,3000);S.aResult=p;const b=blankF();const d={...b,providerName:S.aName,credentials:S.aCreds,specialty:S.aSpec||p.specialty_clues||"",stylePreference:p.stylePreference,pronounPreference:p.pronounPreference,articlePreference:p.articlePreference,abbreviationLevel:p.abbreviationLevel,customAbbreviations:p.detectedAbbreviations||"",reasoningStyle:p.reasoningStyle,customReasoningSymbol:p.reasoningSymbol||">>",nameHandling:p.nameHandling,hpiStructure:p.hpiStructure,hpiStableApproach:p.hpiStableApproach,hpiDeniesStyle:p.hpiDeniesStyle,hpiPlanInclusion:p.hpiPlanInclusion,hpiDiagnosticInclusion:p.hpiDiagnosticInclusion,hpiHistoryInclusion:p.hpiHistoryInclusion,hpiROSPlacement:p.hpiROSPlacement,peDocApproach:p.peDocApproach,peNormalHandling:p.peNormalHandling,peFormat:p.peFormat,peOmitUnexamined:p.peOmitUnexamined,peSeparateFromLabs:p.peSeparateFromLabs,peAbbreviationStyle:p.peAbbreviationStyle,apLeadSentence:p.apLeadSentence,apProblemFormat:p.apProblemFormat,apTrendTracking:p.apTrendTracking,apBulletStyle:p.apBulletStyle,apConsolidation:p.apConsolidation,apReasoningInPlan:p.apReasoningInPlan,apSafetyNet:p.apSafetyNet,apDateFormat:p.apDateFormat!=="mixed"?p.apDateFormat:"",apDuplication:p.apDuplication};S.aInstr={state:d,gens:mkGen(d)}}catch(err){toast("Analysis failed: "+err.message,"error")}S.analyzing=false;R()}
+function rstAna(){S.aResult=null;S.aInstr=null;S.aSaved=false;R()}
+// ── TROUBLESHOOTER ──
+function rTs(){if(S.tsResult)return rTsOut();const secs=["General","HPI","Physical Exam","Assessment & Plan","Results / Background"];return`<div class="flex-between mb-16"><button class="nav-back" onclick="go('landing')">← All modes</button><span class="text-sm text-light">Fix a Section</span></div><div class="card"><div class="text-center mb-16"><div style="font-size:2.5rem;margin-bottom:8px">🔧</div><h2 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep)">Section Troubleshooter</h2></div>${qb("Section",secs.map(s=>`<label class="radio-option"><input type="radio" name="tsS" value="${s}" ${S.tsSection===s?"checked":""} onchange="S.tsSection='${s}'"><div><span class="radio-label">${s}</span></div></label>`))}<div class="form-group mt-16"><label class="form-label">Current instructions</label><textarea class="form-textarea form-input-mono" rows="6" placeholder="Paste current instructions..." oninput="S.tsInstr=this.value">${e(S.tsInstr)}</textarea></div><div class="form-group"><label class="form-label">What's going wrong?</label><textarea class="form-textarea" rows="4" placeholder="e.g., PE includes WNL for unexamined systems..." oninput="S.tsProblem=this.value">${e(S.tsProblem)}</textarea></div><button class="btn btn-primary" onclick="runTs()" ${S.tsing||!S.tsSection||!S.tsInstr.trim()||!S.tsProblem.trim()?"disabled":""}>${S.tsing?"Analyzing...":"Troubleshoot"}</button></div>${rFoot()}`}
+function rTsOut(){const r=S.tsResult;return`<div class="flex-between mb-16"><button class="nav-back" onclick="go('landing')">← All modes</button><span class="text-sm text-light">Fix a Section</span></div><div class="card"><h3 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep);margin-bottom:16px">🔧 ${e(S.tsSection)} — Fix</h3><div class="alert alert-info"><strong>What's happening:</strong> ${e(r.diagnosis||"")}</div><div class="alert alert-purple"><div class="text-bold text-xs mb-8" style="text-transform:uppercase;letter-spacing:.05em">Recommended changes</div>${(r.fixes||[]).map(f=>`<div style="margin-bottom:4px">• ${e(f)}</div>`).join("")}</div>${r.uiSettingCheck?`<div class="alert alert-warn"><strong>Check UI:</strong> ${e(r.uiSettingCheck)}</div>`:""}<div class="output-block"><div class="output-header"><span class="output-title">Revised Instructions</span><button class="btn btn-teal btn-sm" onclick="cp(tsRev,'Revised')">Copy</button></div><div class="output-body">${e(r.revisedInstructions||"")}</div></div><div class="flex gap-12 mt-16"><button class="nav-back" onclick="rstTs()">← Fix another</button><button class="nav-back" onclick="go('landing')">← All modes</button></div></div>${rFoot()}`}
+async function runTs(){if(!S.tsSection||!S.tsInstr.trim()||!S.tsProblem.trim())return;S.tsing=true;R();try{const p=await callAI(P_TS,`Section: ${S.tsSection}\n\nCurrent instructions:\n${S.tsInstr}\n\nProblem:\n${S.tsProblem}`);S.tsResult=p;tsRev=p.revisedInstructions||""}catch(err){toast("Failed: "+err.message,"error")}S.tsing=false;R()}
+function rstTs(){S.tsResult=null;S.tsSection="";S.tsInstr="";S.tsProblem="";R()}
+// ── HISTORY ──
+function rHist(){return`<div class="flex-between mb-16"><button class="nav-back" onclick="go('landing')">← All modes</button><span class="text-sm text-light">History</span></div><div class="card"><h2 style="font-size:1.15rem;font-weight:700;color:var(--navy-deep);margin-bottom:16px">📁 Output History</h2>${!S.history.length?`<div class="text-center" style="padding:32px 0"><div style="font-size:2rem;margin-bottom:8px">📭</div><p class="text-sm text-light">No saved outputs yet.</p><p class="text-xs text-light mt-8">Generate instructions and hit "Save to History."</p></div>`:S.history.map(h=>`<div class="history-entry" id="he-${h.id}"><div class="history-header" onclick="tgH('${h.id}')"><div><div class="text-bold">${e(h.providerLabel||"Unnamed")}</div><div class="text-xs text-light">${new Date(h.createdAt).toLocaleString()} · ${h.source}</div></div><span class="text-xs text-light">▼</span></div><div class="history-body">${Object.entries(h.generators||{}).map(([nm,txt])=>`<div style="margin-bottom:12px"><div class="text-xs text-bold text-light" style="text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">${nm}</div><pre style="font-family:var(--mono);font-size:.78rem;line-height:1.5;background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--border);white-space:pre-wrap;word-break:break-word">${e(txt)}</pre></div>`).join("")}<button class="btn btn-danger btn-sm mt-8" onclick="delH('${h.id}')">🗑 Delete</button></div></div>`).join("")}</div>${rFoot()}`}
+function tgH(id){document.getElementById("he-"+id)?.classList.toggle("open")}
+function delH(id){S.history=S.history.filter(h=>h.id!==id);saveH(S.history);R();toast("Deleted")}
+// ── ADVISOR ──
+function rAdv(){if(S.advOff||S.history.length<2)return"";if(S.advLoading)return`<div class="alert alert-purple" style="animation:pulse 1.5s infinite">🧠 Pattern Advisor analyzing your history...</div>`;if(!S.advRecs){runAdv();return""}if(!S.advRecs.length)return"";const ic={avoid:"🚫",try:"🔬",worked_well:"✅",watch:"👁"};return`<div class="advisor-wrap mb-24"><div class="advisor-header"><span>🧠 Pattern Advisor — Based on your history</span><button style="background:transparent;color:rgba(255,255,255,.7);border:none;padding:4px 8px;cursor:pointer;font-family:var(--font);font-size:.78rem" onclick="S.advOff=true;R()">Dismiss</button></div><div class="advisor-body">${S.advRecs.map(r=>`<div class="advisor-rec ${r.type}"><div class="rec-type">${ic[r.type]||"👁"} ${(r.type||"").replace("_"," ")} · ${r.section}</div><div class="rec-title">${e(r.title||"")}</div><div class="rec-detail">${e(r.detail||"")}</div></div>`).join("")}</div></div>`}
+async function runAdv(){if(S.advLoading)return;S.advLoading=true;R();try{const sum=S.history.slice(0,6).map(h=>({date:new Date(h.createdAt).toLocaleDateString(),provider:h.providerLabel,source:h.source,ratings:h.ratings||{},comments:h.comments||{},generators:Object.fromEntries(Object.entries(h.generators||{}).map(([k,v])=>[k,v.slice(0,200)]))}));const r=await callAI(P_ADV,`Past outputs:\n${JSON.stringify(sum,null,2)}`);S.advRecs=Array.isArray(r)?r:[]}catch{S.advRecs=[]}S.advLoading=false;R()}
+// ── FOOTER ──
+function rFoot(){return`<div class="footer"><div class="disclaimer"><strong>Disclaimer:</strong> These are personal clinical reference tools created by an individual clinician. They are not institutionally endorsed, reviewed, or maintained by any healthcare organization. They do not constitute medical advice and should not be used as the sole basis for clinical decisions. Always use clinical judgment and verify against current guidelines before making patient care decisions. The author assumes no liability for clinical outcomes resulting from use of these tools.<br><br>Walter Hernandez, MSN, MPH, FNP-C</div><div class="version-line" onclick="tgCl()">ClinForge · Nabla Setup Tool v${VERSION}</div><div class="changelog" id="cl">${CHANGELOG.map((l,i)=>`<p${i===0?' style="font-weight:500;color:var(--text-mid)"':''}>${e(l)}</p>`).join("")}</div></div>`}
+function tgCl(){document.getElementById("cl")?.classList.toggle("open")}
+R();
+</script>
+</body>
+</html>
