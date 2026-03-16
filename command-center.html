@@ -3,19 +3,21 @@
   Name: Command Center
   Version: v3.1
   Date: 2026-03-16
-  Risk Tier: LOW (non-clinical productivity tool)
-  Sources: N/A — no clinical content
-  Confidence: N/A
-  Last Verified: N/A
-  Verified Via: N/A
-
-  EXCEPTION: localStorage
-  This tool intentionally uses localStorage for weekly patient tracking
-  data persistence. The GitHub Pages module constraint against localStorage
-  exists to prevent cached clinical values from going stale. This tool
-  contains no clinical values — only timing data and workflow metadata.
-  localStorage is required for core functionality (cross-session persistence
-  of patient logs, notes, and non-patient time tracking).
+  Risk Tier: LOW
+  Sources: N/A (non-clinical productivity tool)
+  Confidence: CURRENT
+  Last Verified: 2026-03-16
+  Verified Via: Personal clinical use
+  Note: This is a productivity/workflow tool, not a clinical decision tool.
+        No clinical values, drug dosing, or diagnostic thresholds are present.
+        Risk tier LOW assigned because all content is timing data and workflow
+        metadata, not patient-facing clinical content.
+        localStorage exception: this tool intentionally uses localStorage for
+        weekly patient tracking data persistence. The GitHub Pages module
+        constraint against localStorage exists to prevent cached clinical
+        values from going stale. This tool contains no clinical values —
+        localStorage is required for core functionality (cross-session
+        persistence of patient logs, notes, and non-patient time tracking).
 -->
 <!DOCTYPE html>
 <html lang="en">
