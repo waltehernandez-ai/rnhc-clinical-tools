@@ -19,4 +19,4 @@ Walter Hernandez, MSN, MPH, FNP-C
 
 ## Changelog
 
-See [changelog.md](changelog.md) for version history.
+See [CHANGELOG.md](CHANGELOG.md) for version history.
