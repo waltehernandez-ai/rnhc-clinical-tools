@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Command Center — ClinForge productivity dashboard">
+<meta name="author" content="Walter Hernandez, MSN, MPH, FNP-C">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+<!--
+  ClinForge Tool Metadata
+  Name: Command Center
+  Version: v3.1
+  Date: 2026-03-16
+  Risk Tier: LOW (non-clinical productivity tool)
+  Sources: N/A — no clinical content
+  Confidence: N/A
+  Last Verified: N/A
+  Verified Via: N/A
+
+  EXCEPTION: localStorage
+  This tool intentionally uses localStorage for weekly patient tracking
+  data persistence. The GitHub Pages module constraint against localStorage
+  exists to prevent cached clinical values from going stale. This tool
+  contains no clinical values — only timing data and workflow metadata.
+  localStorage is required for core functionality (cross-session persistence
+  of patient logs, notes, and non-patient time tracking).
+-->
+<title>Command Center — ClinForge</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+:root{
+  --navy:#163B5C;--navy-deep:#0E2640;--teal:#0B7A7D;--teal-light:#E0F7F6;
+  --green:#1B7A3D;--green-light:#E3F4E8;--orange:#C65100;--orange-light:#FFF0E0;
+  --red:#A12B2B;--red-light:#FDEAEA;--purple:#5B2C8A;--purple-light:#F0E6F9;
+  --amber:#B8860B;--amber-light:#FFF8E1;
+  --bg:#F8F9FB;--surface:#FFFFFF;--text:#1A1A2E;--text-mid:#4A4A5A;--text-light:#7A7A8A;--border:#E2E4EA;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px;font-size:14.4px;line-height:1.6}
+
+/* HEADER */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--navy)}
+.header-left{display:flex;align-items:center;gap:12px}
+.header h1{font-size:1.4rem;font-weight:700;color:var(--navy)}
+.live-time{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--text-mid);font-weight:500}
+.day-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:3px 10px;border-radius:4px;font-weight:700;color:#fff}
+.day-badge.sacred{background:var(--green)}
+.day-badge.regular{background:var(--navy)}
+
+/* LAYOUT */
+.main-grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr}}
+
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.panel:last-child{margin-bottom:0}
+.panel-header{padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center;color:#fff}
+.panel-header::after{content:'▾';font-size:.7rem;opacity:.7;transition:transform .2s}
+.panel.collapsed .panel-header::after{transform:rotate(-90deg)}
+.panel.collapsed .panel-body{display:none}
+.ph-teal{background:var(--teal)}.ph-navy{background:var(--navy)}.ph-purple{background:var(--purple)}.ph-amber{background:var(--amber)}
+.panel-body{padding:16px}
+
+/* MONO / LABELS */
+.mono{font-family:'JetBrains Mono',monospace}
+.small-label{font-family:'DM Sans',sans-serif;font-size:.78rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.small-label-tight{font-family:'DM Sans',sans-serif;font-size:.72rem;color:var(--text-light);font-weight:500;text-transform:uppercase;letter-spacing:.03em}
+
+/* ACTIVE PATIENTS */
+.ap-empty{text-align:center;color:var(--text-light);font-size:.85rem;padding:16px 0;font-style:italic}
+.ap-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;transition:border-color .2s;border-left:4px solid var(--border)}
+.ap-card.is-running{border-left-color:var(--red)}
+.ap-card.is-paused{border-left-color:var(--amber)}
+.ap-card.is-charting{border-left-color:var(--amber);border-left-style:dashed}
+.ap-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ap-status{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase}
+.ap-status.running{background:var(--red-light);color:var(--red)}
+.ap-status.paused{background:var(--amber-light);color:var(--amber)}
+.ap-status.charting{background:var(--amber-light);color:var(--amber)}
+.ap-timer{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;margin-left:auto}
+.ap-timer.running{color:var(--red)}
+.ap-timer.paused{color:var(--amber)}
+.ap-timer.charting{color:var(--amber)}
+.ap-meta{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.ap-tag{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;padding:2px 6px;border-radius:3px}
+.ap-tag.tag-new{background:var(--red-light);color:var(--red)}
+.ap-tag.tag-xlat{background:var(--purple-light);color:var(--purple)}
+.ap-tag.tag-cx{background:var(--amber-light);color:var(--amber)}
+.ap-tag.tag-late{background:var(--red-light);color:var(--red)}
+.ap-actions{display:flex;gap:4px;flex-wrap:wrap}
+.ap-btn{padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-mid);font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s}
+.ap-btn:hover{border-color:var(--text-mid);color:var(--text)}
+.ap-btn.primary{border-color:var(--teal);color:var(--teal)}
+.ap-btn.primary:hover{background:var(--teal-light)}
+.ap-btn.danger{border-color:var(--red);color:var(--red)}
+.ap-btn.danger:hover{background:var(--red-light)}
+.ap-btn.warn{border-color:var(--amber);color:var(--amber)}
+.ap-btn.warn:hover{background:var(--amber-light)}
+
+/* NEW PATIENT FORM */
+.npf{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
+.npf-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;flex-wrap:wrap}
+.npf-field{flex:1;min-width:80px}
+.npf-label{display:block;font-size:.72rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}
+.npf-input{width:100%;padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem;outline:none;transition:border-color .15s}
+.npf-input:focus{border-color:var(--teal)}
+.npf-input::placeholder{color:var(--text-light)}
+.npf-checks{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.npf-check{display:flex;align-items:center;gap:4px;cursor:pointer}
+.npf-check input{accent-color:var(--teal);width:16px;height:16px}
+.npf-check span{font-size:.82rem;color:var(--text-mid)}
+.npf-cx{display:flex;gap:4px;align-items:center}
+.npf-cx-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-light);font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .15s}
+.npf-cx-btn:hover{border-color:var(--amber);color:var(--amber)}
+.npf-cx-btn.selected{border-color:var(--amber);color:#fff;background:var(--amber)}
+.start-pt-btn{width:100%;padding:12px;border:2px solid var(--teal);background:var(--teal-light);color:var(--teal);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .15s}
+.start-pt-btn:hover{background:var(--teal);color:#fff}
+
+/* PHASE TIMER */
+.timer-ring-container{position:relative;width:160px;height:160px;margin:0 auto 12px}
+.timer-ring-container svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:10}
+.ring-progress{fill:none;stroke:var(--red);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .3s}
+.timer-display{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.timer-number{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1;color:var(--text)}
+.timer-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.timer-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.preset-btn{background:var(--bg);color:var(--text-mid);border:1px solid var(--border);border-radius:6px;padding:8px 4px;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .15s}
+.preset-btn:hover{border-color:var(--navy);color:var(--navy)}
+.preset-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.timer-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ctrl-btn{padding:10px;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .15s}
+.ctrl-btn.start{background:var(--green);color:#fff}
+.ctrl-btn.start:hover{background:#1a9044}
+.ctrl-btn.reset{background:var(--bg);color:var(--text-light);border:1px solid var(--border)}
+.ctrl-btn.reset:hover{color:var(--text);border-color:var(--text-mid)}
+.ctrl-btn.pause{background:var(--amber);color:#fff}
+.timer-status{margin-top:8px;font-size:.78rem;color:var(--text-light);text-align:center;line-height:1.4}
+.current-task{font-size:1rem;font-weight:700;margin-bottom:12px;text-align:center;color:var(--navy)}
+
+/* PHASES */
+.phase-list{padding:4px 0}
+.phase-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;transition:background .15s;margin-bottom:2px;border-left:3px solid transparent}
+.phase-item:hover{background:var(--bg)}
+.phase-item.active{background:var(--red-light);border-left-color:var(--red)}
+.phase-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.phase-dot.red{background:var(--red)}.phase-dot.blue{background:var(--navy)}.phase-dot.green{background:var(--green)}.phase-dot.dark{background:var(--text-light)}
+.phase-info{flex:1;min-width:0}
+.phase-name{font-weight:600;font-size:.85rem;color:var(--text)}
+.phase-rule{font-size:.75rem;color:var(--text-light)}
+.phase-timer-hint{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700}
+.phase-timer-hint.red{color:var(--red)}.phase-timer-hint.blue{color:var(--navy)}.phase-timer-hint.green{color:var(--green)}.phase-timer-hint.dark{color:var(--text-light)}
+.phase-divider{border-top:1px solid var(--border);margin:6px 0}
+
+/* TRACKER STATS */
+.tracker-stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 6px;text-align:center}
+.stat-value{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--teal);line-height:1}
+.stat-label{font-size:.65rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+
+/* PROJECTION */
+.projection-bar{padding:10px 12px;border-radius:8px;margin-bottom:12px;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;text-align:center;transition:all .3s;border:1px solid var(--border);background:var(--bg);color:var(--text-light)}
+.projection-bar.proj-green{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.projection-bar.proj-yellow{background:var(--amber-light);border-color:var(--amber);color:var(--amber)}
+.projection-bar.proj-red{background:var(--red-light);border-color:var(--red);color:var(--red)}
+
+.target-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.target-input{width:48px;padding:4px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;outline:none}
+.target-input:focus{border-color:var(--teal)}
+
+/* PATIENT LOG */
+.patient-log{max-height:280px;overflow-y:auto;margin-bottom:8px}
+.patient-log::-webkit-scrollbar{width:4px}
+.patient-log::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.pe{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.pe:last-child{border-bottom:none}
+.pe-num{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--teal);min-width:24px;font-size:.78rem}
+.pe-time{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text-light);min-width:50px}
+.pe-tags{display:flex;gap:3px;flex-shrink:0}
+.pe-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;padding:1px 4px;border-radius:3px}
+.pe-tag.tag-new{background:var(--red-light);color:var(--red)}
+.pe-tag.tag-xlat{background:var(--purple-light);color:var(--purple)}
+.pe-tag.tag-cx{background:var(--amber-light);color:var(--amber)}
+.pe-dur{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;margin-left:auto;cursor:pointer;color:var(--text)}
+.pe-dur:hover{text-decoration:underline dashed}
+.pe-dur.over{color:var(--red)}
+.pe-chart{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--amber);flex-shrink:0}
+.pe-remove{font-size:.78rem;color:var(--text-light);cursor:pointer;padding:0 4px;transition:color .15s}
+.pe-remove:hover{color:var(--red)}
+.pe-edit-input{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;background:var(--surface);color:var(--text);border:1px solid var(--teal);border-radius:4px;padding:2px 4px;width:50px;text-align:center;outline:none;margin-left:auto}
+.no-patients{text-align:center;color:var(--text-light);font-size:.85rem;padding:16px 0;font-style:italic}
+
+/* MANUAL ADD */
+.add-manual-btn{width:100%;padding:6px;margin-top:6px;background:transparent;border:1px dashed var(--border);color:var(--text-light);border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s}
+.add-manual-btn:hover{border-color:var(--teal);color:var(--teal)}
+.manual-form{margin-top:8px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px}
+
+/* NOTES */
+.workflow-notes{width:100%;min-height:56px;max-height:120px;resize:vertical;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;padding:10px;line-height:1.5;outline:none}
+.workflow-notes:focus{border-color:var(--teal)}
+.workflow-notes::placeholder{color:var(--text-light)}
+.tracker-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.reset-btn{width:100%;padding:6px;background:var(--surface);border:1px solid var(--border);color:var(--text-mid);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s}
+.reset-btn:hover{border-color:var(--text-mid);color:var(--text)}
+
+/* NPT */
+.npt-controls{display:flex;gap:4px;flex-wrap:wrap}
+.npt-cat-btn{padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-mid);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s}
+.npt-cat-btn:hover{border-color:var(--purple);color:var(--purple)}
+.npt-cat-btn.active{border-color:var(--purple);color:#fff;background:var(--purple)}
+.npt-timer-display{font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--purple);text-align:center;margin:8px 0;min-height:20px;font-weight:600}
+.npt-timer-display.active{animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.npt-btn-row{display:flex;gap:6px;margin-top:6px}
+.npt-entry{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.npt-entry:last-child{border-bottom:none}
+.npt-cat{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600;color:var(--purple);min-width:56px}
+.npt-dur{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;margin-left:auto;color:var(--purple)}
+.npt-remove{font-size:.78rem;color:var(--text-light);cursor:pointer;padding:0 4px}
+.npt-remove:hover{color:var(--red)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:92%;max-width:620px;max-height:85vh;overflow-y:auto;padding:24px}
+.modal-title{font-size:1.15rem;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;color:var(--navy)}
+.modal-close{background:var(--bg);border:1px solid var(--border);color:var(--text-mid);font-size:.85rem;cursor:pointer;padding:4px 10px;border-radius:6px}
+.modal-close:hover{color:var(--text)}
+.report-section{margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.report-section:last-child{border-bottom:none}
+.report-section-title{font-size:.78rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.rr{display:flex;justify-content:space-between;font-size:.85rem;padding:3px 0}
+.rr .rr-l{color:var(--text-mid)}.rr .rr-v{font-family:'JetBrains Mono',monospace;font-weight:600}
+.rd-header{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;margin-top:8px;margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid var(--border);color:var(--navy)}
+.rd-pt{display:flex;justify-content:space-between;font-size:.78rem;padding:2px 0 2px 12px;color:var(--text-mid)}
+.rd-pt .rd-v{font-family:'JetBrains Mono',monospace;color:var(--text)}
+.report-cx-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+.rcx{display:flex;justify-content:space-between;font-size:.82rem;padding:2px 0}
+.rcx-l{color:var(--text-mid)}.rcx-v{font-family:'JetBrains Mono',monospace;font-weight:600}
+.copy-btn{width:100%;padding:10px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;margin-top:10px}
+.copy-btn:hover{opacity:.9}
+.copy-btn.copied{background:var(--green)}
+
+/* ALERT */
+.timer-alert{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(161,43,43,.95);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer}
+.timer-alert.show{display:flex}
+.alert-title{font-family:'JetBrains Mono',monospace;font-size:2.5rem;font-weight:700;color:#fff;margin-bottom:16px}
+.alert-msg{font-size:1.1rem;color:rgba(255,255,255,.9);margin-bottom:20px;max-width:500px;padding:0 24px;line-height:1.5}
+.alert-dismiss{font-size:.85rem;color:rgba(255,255,255,.6);border:2px solid rgba(255,255,255,.4);padding:10px 24px;border-radius:8px}
+
+/* FOOTER */
+.site-footer{margin-top:32px;padding:16px;border-top:1px solid var(--border);font-size:.75rem;color:var(--text-light);line-height:1.5;text-align:center}
+.site-footer strong{color:var(--text-mid);font-weight:600}
+.version-tag{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text-light);margin-top:8px}
+
+@media(max-width:640px){.tracker-stats{grid-template-columns:1fr 1fr}.npf-row{flex-direction:column}.alert-title{font-size:1.8rem}.alert-msg{font-size:.9rem}}
+</style>
+</head>
+<body>
+<div class="timer-alert" id="timerAlert" onclick="W.dismissAlert()"><div class="alert-title">⏱ TIME</div><div class="alert-msg" id="alertMsg"></div><div class="alert-dismiss">Click anywhere to dismiss</div></div>
+<div class="modal-overlay" id="reportModal"><div class="modal-box"><div class="modal-title"><span>📊 Weekly Report</span><button class="modal-close" onclick="W.closeReport()">✕</button></div><div id="reportContent"></div><button class="copy-btn" id="copyBtn" onclick="W.copyReport()">📋 COPY TO CLIPBOARD</button></div></div>
+
+<div class="header"><div class="header-left"><h1>Command Center</h1><span class="day-badge" id="dayBadge">---</span></div><div><span class="live-time" id="liveTime">--:--</span></div></div>
+
+<div class="main-grid">
+<div>
+  <div class="panel"><div class="panel-header ph-teal">⏱ Active Patients</div><div class="panel-body">
+    <div id="activePatients"><div class="ap-empty">No active patients</div></div>
+    <div id="newPtFormWrap"></div>
+    <button class="start-pt-btn" id="startPtBtn" onclick="W.showNewPtForm()">+ Start New Patient</button>
+  </div></div>
+
+  <div class="panel"><div class="panel-header ph-navy">⏰ Phase Timer</div><div class="panel-body" style="text-align:center">
+    <div class="current-task" id="currentTask">Select a phase</div>
+    <div class="timer-ring-container"><svg width="160" height="160" viewBox="0 0 160 160"><circle class="ring-bg" cx="80" cy="80" r="70"/><circle class="ring-progress" id="ringProgress" cx="80" cy="80" r="70" stroke-dasharray="439.82" stroke-dashoffset="0"/></svg><div class="timer-display"><div class="timer-number" id="timerDisplay">00:00</div><div class="timer-label" id="timerLabel">READY</div></div></div>
+    <div class="timer-presets"><button class="preset-btn" onclick="W.setPreset(5,this)">5m</button><button class="preset-btn" onclick="W.setPreset(10,this)">10m</button><button class="preset-btn" onclick="W.setPreset(25,this)">25m</button><button class="preset-btn" onclick="W.setPreset(50,this)">50m</button></div>
+    <div class="timer-controls"><button class="ctrl-btn start" id="startBtn" onclick="W.toggleTimer()">▶ START</button><button class="ctrl-btn reset" onclick="W.resetTimer()">↺ RESET</button></div>
+    <div class="timer-status" id="timerStatus">Select a preset or phase</div>
+  </div></div>
+
+  <div class="panel"><div class="panel-header ph-navy">📋 Daily Phases</div><div class="panel-body"><div id="phaseList"></div></div></div>
+</div>
+<div>
+  <div class="panel"><div class="panel-header ph-teal">📊 Patient Tracker</div><div class="panel-body">
+    <div class="target-row"><span class="small-label">Target:</span><input type="number" class="target-input" id="targetInput" value="23" min="1" max="40" onchange="W.saveTarget()"><span class="small-label">patients</span></div>
+    <div class="tracker-stats"><div class="stat-box"><div class="stat-value" id="sWk">0</div><div class="stat-label">Week</div></div><div class="stat-box"><div class="stat-value" id="sDay">0</div><div class="stat-label">Today</div></div><div class="stat-box"><div class="stat-value" id="sAvg">0:00</div><div class="stat-label">Avg/Pt</div></div><div class="stat-box"><div class="stat-value" id="sCare">0:00</div><div class="stat-label">Care</div></div></div>
+    <div class="projection-bar" id="projBar">Projection appears after first patient</div>
+    <div class="small-label" style="margin-bottom:4px">Today's Log</div>
+    <div class="patient-log" id="patientLog"><div class="no-patients">No patients logged yet</div></div>
+    <button class="add-manual-btn" id="addManualBtn" onclick="W.toggleManual()">+ Add Manually</button>
+    <div class="manual-form" id="manualForm" style="display:none"><div class="manual-row" style="display:flex;gap:6px;align-items:flex-end"><div class="manual-field" style="flex:1"><span class="npf-label">Time</span><input type="text" id="mTime" class="npf-input" placeholder="10:30 AM"></div><div class="manual-field" style="flex:1"><span class="npf-label">Duration</span><input type="text" id="mDur" class="npf-input" placeholder="15"></div><button class="ap-btn primary" onclick="W.saveManual()">ADD</button></div></div>
+    <div class="small-label" style="margin-top:12px;margin-bottom:4px">Notes</div>
+    <textarea id="workNotes" class="workflow-notes" placeholder="Observations, bottlenecks, wins..." oninput="W.saveNotes()"></textarea>
+    <div class="tracker-actions"><button class="reset-btn" onclick="W.showReport()">📊 Weekly Report</button><button class="reset-btn" id="resetWeekBtn" onclick="W.confirmReset()">↺ Reset Week</button></div>
+  </div></div>
+
+  <div class="panel"><div class="panel-header ph-purple">⏳ Non-Patient Time</div><div class="panel-body">
+    <div class="npt-controls" id="nptCats"></div>
+    <div class="npt-timer-display" id="nptTimerDisp"></div>
+    <div class="npt-btn-row"><button class="ap-btn primary" id="nptStartBtn" onclick="W.nptToggle()">▶ Start</button><button class="ap-btn" onclick="W.nptStop()">⏹ Stop & Log</button></div>
+    <div id="nptLog" style="margin-top:8px"></div>
+  </div></div>
+</div>
+</div>
+
+<footer class="site-footer">
+  Disclaimer: These are personal clinical reference tools created by an individual clinician. They are not institutionally endorsed, reviewed, or maintained by any healthcare organization. They do not constitute medical advice and should not be used as the sole basis for clinical decisions. Always use clinical judgment and verify against current guidelines before making patient care decisions. The author assumes no liability for clinical outcomes resulting from use of these tools.<br><br>
+  <strong>Walter Hernandez, MSN, MPH, FNP-C</strong>
+  <div class="version-tag">v3.1 · March 2026</div>
+</footer>
+
+<script>
+(function(){'use strict';
+const CIRC=2*Math.PI*70,$=id=>document.getElementById(id);
+const DN=['SUN','MON','TUE','WED','THU','FRI','SAT'],DF=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+let weekData={},weekNotes={},dailyTarget=23,activePatients=[],nextPtId=1;
+let nptData={},nptRunning=false,nptStart=null,nptCat='Inbox',nptInterval=null;
+const NPT_CATS=['Inbox','Prior Auth','Referrals','Admin','Other'];
+let pts=0,prem=0,prun=false,pti2=null,pMsg='';
+const SK='commandCenterV3';
+function save(){try{localStorage.setItem(SK,JSON.stringify({weekData,weekNotes,dailyTarget,nptData}))}catch(x){}}
+function load(){try{const r=localStorage.getItem(SK);if(r){const s=JSON.parse(r);if(s.weekData)weekData=s.weekData;if(s.weekNotes)weekNotes=s.weekNotes;if(s.dailyTarget)dailyTarget=s.dailyTarget;if(s.nptData)nptData=s.nptData}}catch(x){}}
+function tk(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function fd(s){if(s<0)s=0;return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}
+function ftn(){const d=new Date(),h=d.getHours(),m=d.getMinutes();return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`}
+function gtp(){return weekData[tk()]||[]}
+function gap(){return Object.values(weekData).flat()}
+function pd(s){s=s.trim().toLowerCase();let m=s.match(/^(\d+)\s*m(?:in)?$/);if(m)return parseInt(m[1])*60;m=s.match(/^(\d+):(\d{1,2})$/);if(m)return parseInt(m[1])*60+parseInt(m[2]);m=s.match(/^(\d+)$/);if(m)return parseInt(m[1])*60;return null}
+function parseTime(s){s=s.trim().toUpperCase();const m=s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/);if(!m)return null;let h=parseInt(m[1]),mi=parseInt(m[2]);const ap=m[3];if(ap==='PM'&&h<12)h+=12;if(ap==='AM'&&h===12)h=0;if(h>23||mi>59)return null;return`${h%12||12}:${String(mi).padStart(2,'0')} ${h>=12?'PM':'AM'}`}
+function timeDiffMin(sched,actual){if(!sched||!actual)return null;function toM(s){const m=s.match(/(\d+):(\d+)\s*(AM|PM)/);if(!m)return null;let h=parseInt(m[1]),mi=parseInt(m[2]);if(m[3]==='PM'&&h<12)h+=12;if(m[3]==='AM'&&h===12)h=0;return h*60+mi}const s=toM(sched),a=toM(actual);if(s===null||a===null)return null;return a-s}
+
+// ── ACTIVE PATIENTS ──
+let apInterval=null;
+function startApTick(){if(apInterval)return;apInterval=setInterval(()=>{activePatients.forEach(p=>{if(p.state==='running')p.elapsed=Math.round((Date.now()-p.startedAt)/1000);if(p.state==='charting')p.chartElapsed=Math.round((Date.now()-p.chartStart)/1000)});renderActive()},1000)}
+function stopApTick(){if(!activePatients.length){clearInterval(apInterval);apInterval=null}}
+function renderActive(){const c=$('activePatients');if(!activePatients.length){c.innerHTML='<div class="ap-empty">No active patients</div>';stopApTick();return}c.innerHTML=activePatients.map((p,i)=>{const dur=p.elapsed;const tags=[];if(p.meta.newPt)tags.push('<span class="ap-tag tag-new">NEW</span>');if(p.meta.translator)tags.push('<span class="ap-tag tag-xlat">XLAT</span>');if(p.meta.complexity)tags.push(`<span class="ap-tag tag-cx">CX:${p.meta.complexity}</span>`);const late=timeDiffMin(p.meta.scheduledTime,p.meta.actualTime);if(late!==null&&late>5)tags.push(`<span class="ap-tag tag-late">+${late}m late</span>`);let statusCls=p.state,statusTxt=p.state==='running'?'RUNNING':p.state==='paused'?'PAUSED':'CHARTING';let timerTxt=p.state==='charting'?fd(p.chartElapsed):fd(dur);let actions='';if(p.state==='running')actions=`<button class="ap-btn warn" onclick="W.pausePt(${i})">⏸ Pause</button><button class="ap-btn primary" onclick="W.completePt(${i})">✓ Patient Complete</button><button class="ap-btn danger" onclick="W.cancelPt(${i})">✕</button>`;else if(p.state==='paused')actions=`<button class="ap-btn primary" onclick="W.resumePt(${i})">▶ Resume</button><button class="ap-btn primary" onclick="W.completePt(${i})">✓ Patient Complete</button><button class="ap-btn danger" onclick="W.cancelPt(${i})">✕</button>`;else if(p.state==='charting')actions=`<button class="ap-btn warn" onclick="W.closeChart(${i})">📋 Chart Closed</button><button class="ap-btn danger" onclick="W.cancelPt(${i})">✕</button>`;return`<div class="ap-card is-${p.state}"><div class="ap-top"><span class="ap-status ${statusCls}">${statusTxt}</span>${tags.length?'<span class="ap-meta">'+tags.join('')+'</span>':''}<span class="ap-timer ${statusCls}">${p.state==='charting'?'📋 ':'⏱ '}${timerTxt}</span></div>${p.state!=='charting'?`<div style="font-size:.75rem;color:var(--text-light);margin-bottom:6px">Visit: ${fd(dur)}</div>`:''}<div class="ap-actions">${actions}</div></div>`}).join('')}
+function addPatient(meta){activePatients.push({id:nextPtId++,startedAt:Date.now(),elapsed:0,pauseStart:null,meta,state:'running',chartStart:null,chartElapsed:0});startApTick();renderActive()}
+function pausePt(i){const p=activePatients[i];if(!p||p.state!=='running')return;p.elapsed=Math.round((Date.now()-p.startedAt)/1000);p.pauseStart=Date.now();p.state='paused';renderActive()}
+function resumePt(i){const p=activePatients[i];if(!p||p.state!=='paused')return;p.startedAt+=Date.now()-p.pauseStart;p.state='running';renderActive()}
+function completePt(i){const p=activePatients[i];if(!p)return;if(p.state==='running')p.elapsed=Math.round((Date.now()-p.startedAt)/1000);p.state='charting';p.chartStart=Date.now();p.chartElapsed=0;renderActive()}
+function closeChart(i){const p=activePatients[i];if(!p||p.state!=='charting')return;p.chartElapsed=Math.round((Date.now()-p.chartStart)/1000);logPt(p);activePatients.splice(i,1);renderActive()}
+function cancelPt(i){const p=activePatients[i];if(!p)return;if(p.state==='running')p.elapsed=Math.round((Date.now()-p.startedAt)/1000);if(p.elapsed>30)logPt(p);activePatients.splice(i,1);renderActive()}
+function logPt(p){const k=tk();if(!weekData[k])weekData[k]=[];const t=weekData[k],tags=[];if(p.meta.newPt)tags.push('new');if(p.meta.translator)tags.push('translator');if(p.meta.complexity)tags.push('cx'+p.meta.complexity);t.push({num:t.length+1,time:p.meta.actualTime||ftn(),durationSec:p.elapsed,tags,chartSec:p.state==='charting'?p.chartElapsed:null,complexity:p.meta.complexity||null,scheduledTime:p.meta.scheduledTime||null,actualTime:p.meta.actualTime||null,newPt:!!p.meta.newPt,translator:!!p.meta.translator});renderLog()}
+
+// ── NEW PATIENT FORM ──
+let formVis=false,selCx=0;
+function showNewPtForm(){if(formVis){hideNewPtForm();return}formVis=true;$('startPtBtn').textContent='✕ Cancel';$('newPtFormWrap').innerHTML=`<div class="npf"><div class="npf-row"><div class="npf-field"><span class="npf-label">Scheduled</span><input type="text" id="npfSched" class="npf-input" placeholder="10:00 AM"></div><div class="npf-field"><span class="npf-label">Actual Start</span><input type="text" id="npfActual" class="npf-input" value="${ftn()}"></div></div><div class="npf-row"><div class="npf-checks"><label class="npf-check"><input type="checkbox" id="npfNew"><span>New to me</span></label><label class="npf-check"><input type="checkbox" id="npfXlat"><span>Translator</span></label></div><div style="margin-left:auto;display:flex;align-items:center;gap:6px"><span class="npf-label" style="margin:0">Complexity</span><div class="npf-cx">${[1,2,3,4,5].map(n=>`<button class="npf-cx-btn" data-cx="${n}" onclick="W.setCx(this)">${n}</button>`).join('')}</div></div></div><button class="start-pt-btn" style="margin-top:10px" onclick="W.launchPt()">⏱ Start Timer</button></div>`}
+function hideNewPtForm(){formVis=false;$('startPtBtn').textContent='+ Start New Patient';$('newPtFormWrap').innerHTML=''}
+function setCx(btn){const v=parseInt(btn.dataset.cx);selCx=selCx===v?0:v;document.querySelectorAll('.npf-cx-btn').forEach(b=>b.classList.toggle('selected',parseInt(b.dataset.cx)===selCx))}
+function launchPt(){const sched=$('npfSched')?$('npfSched').value.trim():'',actual=$('npfActual')?$('npfActual').value.trim():'';const meta={newPt:$('npfNew')?.checked||false,translator:$('npfXlat')?.checked||false,complexity:selCx||null,scheduledTime:parseTime(sched)||null,actualTime:parseTime(actual)||ftn()};selCx=0;hideNewPtForm();addPatient(meta)}
+
+// ── PATIENT LOG ──
+function renderLog(){const t=gtp();if(!t.length)$('patientLog').innerHTML='<div class="no-patients">No patients logged yet</div>';else $('patientLog').innerHTML=t.map((p,i)=>{let tgs='';if(p.tags&&p.tags.length)tgs='<span class="pe-tags">'+p.tags.map(t2=>{let c='tag-cx',l=t2;if(t2==='new'){c='tag-new';l='NEW'}else if(t2==='translator'){c='tag-xlat';l='XLAT'}else if(t2.startsWith('cx'))l='CX:'+t2.slice(2);return`<span class="pe-tag ${c}">${l}</span>`}).join('')+'</span>';let ch='';if(p.chartSec!=null)ch=`<span class="pe-chart">📋${fd(p.chartSec)}</span>`;return`<div class="pe"><span class="pe-num">#${p.num}</span><span class="pe-time">${p.time}</span>${tgs}<span class="pe-dur${p.durationSec>1200?' over':''}" onclick="W.editDur(${i})">${fd(p.durationSec)}</span>${ch}<span class="pe-remove" onclick="W.removePt(${i})">✕</span></div>`}).join('');updateStats();updateProj();save()}
+function updateStats(){const t=gtp(),a=gap(),ts2=t.reduce((s,p)=>s+p.durationSec,0),av=t.length?Math.round(ts2/t.length):0;$('sWk').textContent=a.length;$('sDay').textContent=t.length;$('sCare').textContent=fd(ts2);$('sAvg').textContent=fd(av)}
+function updateProj(){const t=gtp(),tgt=parseInt($('targetInput').value)||dailyTarget,r=tgt-t.length,bar=$('projBar');if(!t.length){bar.className='projection-bar';bar.textContent=`Target: ${tgt} — projection after first patient`;return}if(r<=0){bar.className='projection-bar proj-green';bar.textContent=`✓ Target reached: ${t.length}/${tgt}`;return}const ts2=t.reduce((s,p)=>s+p.durationSec,0),av=Math.round(ts2/t.length),rs=r*av,now=new Date(),ft=new Date(now.getTime()+rs*1000),fh=ft.getHours(),fm=ft.getMinutes(),fs=`${fh%12||12}:${String(fm).padStart(2,'0')} ${fh>=12?'PM':'AM'}`,fmn=fh*60+fm;let cls,em;if(fmn<=17*60+15){cls='proj-green';em='✓'}else if(fmn<=18*60){cls='proj-yellow';em='⚠'}else{cls='proj-red';em='⛔'}bar.className=`projection-bar ${cls}`;bar.textContent=`${em} ${r} left × ${fd(av)} avg → ~${fs}`}
+function editDur(i){const k=tk(),t=weekData[k];if(!t||!t[i])return;const p=t[i],es=$('patientLog').querySelectorAll('.pe'),entry=es[i];if(!entry)return;const ds=entry.querySelector('.pe-dur');if(!ds)return;const inp=document.createElement('input');inp.type='text';inp.className='pe-edit-input';inp.value=fd(p.durationSec);function commit(){const v=pd(inp.value.trim());if(v!==null&&v>=0)p.durationSec=v;renderLog()}inp.addEventListener('blur',commit);inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();inp.blur()}if(ev.key==='Escape')renderLog()});ds.replaceWith(inp);inp.focus();inp.select()}
+function removePt(i){const k=tk();if(!weekData[k])return;weekData[k].splice(i,1);weekData[k].forEach((p,j)=>p.num=j+1);renderLog()}
+function toggleManual(){const f=$('manualForm'),b=$('addManualBtn');if(f.style.display==='none'){f.style.display='block';b.textContent='✕ Cancel';$('mTime').value=ftn();$('mDur').value='';$('mDur').focus()}else{f.style.display='none';b.textContent='+ Add Manually'}}
+function saveManual(){const pt=parseTime($('mTime').value.trim());if(!pt){$('mTime').style.borderColor='var(--red)';setTimeout(()=>$('mTime').style.borderColor='',1500);return}const du=pd($('mDur').value.trim());if(du===null||du<0){$('mDur').style.borderColor='var(--red)';setTimeout(()=>$('mDur').style.borderColor='',1500);return}const k=tk();if(!weekData[k])weekData[k]=[];weekData[k].push({num:weekData[k].length+1,time:pt,durationSec:du,tags:[],chartSec:null,complexity:null,scheduledTime:null,actualTime:pt,newPt:false,translator:false});renderLog();$('manualForm').style.display='none';$('addManualBtn').textContent='+ Add Manually'}
+function saveTarget(){dailyTarget=parseInt($('targetInput').value)||23;updateProj();save()}
+function saveNotes(){weekNotes[tk()]=$('workNotes').value;save()}
+
+// ── NPT ──
+function renderNptCats(){$('nptCats').innerHTML=NPT_CATS.map(c=>`<button class="npt-cat-btn${nptCat===c?' active':''}" onclick="W.nptSetCat('${c}')">${c}</button>`).join('')}
+function nptSetCat(c){nptCat=c;renderNptCats()}
+function nptToggle(){if(nptRunning)return;nptRunning=true;nptStart=Date.now();$('nptStartBtn').textContent='⏸ Running';$('nptTimerDisp').classList.add('active');nptInterval=setInterval(()=>{$('nptTimerDisp').textContent=`⏳ ${nptCat}: ${fd(Math.round((Date.now()-nptStart)/1000))}`},1000)}
+function nptStop(){if(!nptRunning)return;nptRunning=false;clearInterval(nptInterval);const dur=Math.round((Date.now()-nptStart)/1000);nptStart=null;$('nptTimerDisp').textContent='';$('nptTimerDisp').classList.remove('active');$('nptStartBtn').textContent='▶ Start';if(dur<5)return;const k=tk();if(!nptData[k])nptData[k]=[];nptData[k].push({cat:nptCat,durationSec:dur,time:ftn()});save();renderNptLog()}
+function renderNptLog(){const today=nptData[tk()]||[];if(!today.length){$('nptLog').innerHTML='';return}$('nptLog').innerHTML=today.map((n,i)=>`<div class="npt-entry"><span class="npt-cat">${n.cat}</span><span style="font-size:.75rem;color:var(--text-light)">${n.time}</span><span class="npt-dur">${fd(n.durationSec)}</span><span class="npt-remove" onclick="W.nptRemove(${i})">✕</span></div>`).join('')}
+function nptRemove(i){const k=tk();if(!nptData[k])return;nptData[k].splice(i,1);save();renderNptLog()}
+
+// ── PHASES ──
+const PHASES=[{name:'Arrive',rule:'Epic + Secure Chat only. Triage.',minutes:5,color:'red',msg:'Park items in Planner. DO NOT solve.'},{name:'Between Patients',rule:'Nabla ONE-TOUCH. B+ and sign.',minutes:5,color:'red',msg:'Review + sign. B+ is enough.'},{name:'Lunch',rule:'Leave the building.',minutes:25,color:'blue',msg:'No screens. You are not a machine.'},{name:'After Last Patient',rule:'Sign → Referrals → Prior auths.',minutes:25,color:'red',msg:'In that order.'},{name:'Inbox Batch',rule:'Finish each category.',minutes:25,color:'red',msg:"Don't bounce between categories."},{name:'5:10 PM Hard Stop',rule:'Walk out.',minutes:0,color:'dark',msg:'Primary care never ends. You do.'},{divider:true},{name:'Tue/Thu Inbox',rule:'7:30 AM',minutes:25,color:'green',msg:'Inbox maintenance.'},{name:'Tue/Thu Projects',rule:'8:00 AM',minutes:25,color:'green',msg:'FMLA, Admin. Channels CLOSED.'}];
+function renderPhases(){$('phaseList').innerHTML=PHASES.map((p,i)=>{if(p.divider)return'<div class="phase-divider"></div>';return`<div class="phase-item" data-idx="${i}" onclick="W.selectPhase(${i})"><div class="phase-dot ${p.color}"></div><div class="phase-info"><div class="phase-name">${p.name}</div><div class="phase-rule">${p.rule}</div></div><div class="phase-timer-hint ${p.color}">${p.minutes>0?p.minutes+'m':'STOP'}</div></div>`}).join('')}
+function selectPhase(i){const p=PHASES[i];if(!p||p.divider)return;document.querySelectorAll('.phase-item').forEach(x=>x.classList.remove('active'));const pe=document.querySelector(`.phase-item[data-idx="${i}"]`);if(pe)pe.classList.add('active');$('currentTask').textContent=p.name;pMsg=p.msg;$('timerStatus').textContent=p.msg;if(p.minutes>0){stopPhase();pts=p.minutes*60;prem=pts;$('timerLabel').textContent='READY';updatePhase();document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'))}}
+function setPreset(m,btn){stopPhase();pts=m*60;prem=pts;updatePhase();$('timerLabel').textContent='READY';$('timerStatus').textContent=`${m}m loaded`;document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active')}
+function toggleTimer(){if(prem===0&&!prun)return;prun?pausePhase():startPhase()}
+function startPhase(){if(prem<=0)return;prun=true;$('startBtn').textContent='⏸ PAUSE';$('startBtn').className='ctrl-btn pause';$('timerLabel').textContent='RUNNING';pti2=setInterval(phaseTick,1000)}
+function pausePhase(){prun=false;clearInterval(pti2);$('startBtn').textContent='▶ RESUME';$('startBtn').className='ctrl-btn start';$('timerLabel').textContent='PAUSED'}
+function stopPhase(){prun=false;clearInterval(pti2);$('startBtn').textContent='▶ START';$('startBtn').className='ctrl-btn start'}
+function resetTimer(){stopPhase();prem=pts;$('timerLabel').textContent='READY';$('timerStatus').textContent='Select a preset or phase';updatePhase();document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'))}
+function phaseTick(){prem--;updatePhase();if(prem<=0){clearInterval(pti2);prun=false;$('timerLabel').textContent='DONE';stopPhase();$('alertMsg').textContent=pMsg||'Timer complete.';$('timerAlert').classList.add('show');try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[0,.3,.6].forEach(d=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.setValueAtTime(.3,ctx.currentTime+d);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+d+.3);o.start(ctx.currentTime+d);o.stop(ctx.currentTime+d+.3)})}catch(x){}}}
+function updatePhase(){$('timerDisplay').textContent=`${String(Math.floor(prem/60)).padStart(2,'0')}:${String(prem%60).padStart(2,'0')}`;const p=pts>0?prem/pts:0;$('ringProgress').style.strokeDashoffset=CIRC*(1-p);$('ringProgress').style.stroke=pts===0?'var(--border)':p>.5?'var(--green)':p>.25?'var(--amber)':'var(--red)'}
+function dismissAlert(){$('timerAlert').classList.remove('show')}
+function updateClock(){const n=new Date(),h=n.getHours(),m=n.getMinutes(),s=n.getSeconds();$('liveTime').textContent=`${String(h%12||12).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} ${h>=12?'PM':'AM'}`;$('dayBadge').textContent=DN[n.getDay()];$('dayBadge').className='day-badge '+(new Set([2,4]).has(n.getDay())?'sacred':'regular')}
+
+// ── REPORT ──
+function showReport(){const sorted=Object.keys(weekData).sort();if(!sorted.length){$('reportContent').innerHTML='<div class="no-patients">No data.</div>';$('reportModal').classList.add('show');return}const all=gap(),totalSec=all.reduce((s,p)=>s+p.durationSec,0),avg=all.length?Math.round(totalSec/all.length):0,charted=all.filter(p=>p.chartSec!=null),avgChart=charted.length?Math.round(charted.reduce((s,p)=>s+p.chartSec,0)/charted.length):0,newPts=all.filter(p=>p.newPt),xlatPts=all.filter(p=>p.translator),avgNew=newPts.length?Math.round(newPts.reduce((s,p)=>s+p.durationSec,0)/newPts.length):0,avgXlat=xlatPts.length?Math.round(xlatPts.reduce((s,p)=>s+p.durationSec,0)/xlatPts.length):0;let nptTotal=0;Object.values(nptData).flat().forEach(n=>nptTotal+=n.durationSec);const cxB={};all.forEach(p=>{const c=p.complexity||0;if(!cxB[c])cxB[c]={n:0,s:0};cxB[c].n++;cxB[c].s+=p.durationSec});
+let h=`<div class="report-section"><div class="report-section-title">Weekly Summary</div><div class="rr"><span class="rr-l">Total patients</span><span class="rr-v">${all.length}</span></div><div class="rr"><span class="rr-l">Total care time</span><span class="rr-v">${fd(totalSec)}</span></div><div class="rr"><span class="rr-l">Avg per patient</span><span class="rr-v">${fd(avg)}</span></div><div class="rr"><span class="rr-l">Avg chart closure</span><span class="rr-v">${charted.length?fd(avgChart):'—'}</span></div><div class="rr"><span class="rr-l">Non-patient time</span><span class="rr-v">${fd(nptTotal)}</span></div><div class="rr"><span class="rr-l">Days worked</span><span class="rr-v">${sorted.length}</span></div></div>`;
+h+=`<div class="report-section"><div class="report-section-title">By Patient Type</div><div class="rr"><span class="rr-l">New patients</span><span class="rr-v">${newPts.length} pts · ${newPts.length?fd(avgNew)+' avg':'—'}</span></div><div class="rr"><span class="rr-l">Translator used</span><span class="rr-v">${xlatPts.length} pts · ${xlatPts.length?fd(avgXlat)+' avg':'—'}</span></div></div>`;
+const cxK=Object.keys(cxB).sort();if(cxK.length>1||!cxB['0']){h+=`<div class="report-section"><div class="report-section-title">By Complexity (1-5)</div><div class="report-cx-grid">`;cxK.forEach(k=>{const b=cxB[k];h+=`<div class="rcx"><span class="rcx-l">${k==='0'?'Unrated':'Level '+k}</span><span class="rcx-v">${b.n} pts · ${fd(Math.round(b.s/b.n))} avg</span></div>`});h+='</div></div>'}
+const allNpt=Object.values(nptData).flat();if(allNpt.length){const nb={};allNpt.forEach(n=>{if(!nb[n.cat])nb[n.cat]=0;nb[n.cat]+=n.durationSec});h+=`<div class="report-section"><div class="report-section-title">Non-Patient Time</div>`;Object.entries(nb).sort((a,b)=>b[1]-a[1]).forEach(([cat,sec])=>{h+=`<div class="rr"><span class="rr-l">${cat}</span><span class="rr-v">${fd(sec)}</span></div>`});h+='</div>'}
+h+=`<div class="report-section"><div class="report-section-title">Daily Breakdown</div>`;sorted.forEach(dk=>{const pts3=weekData[dk],d=new Date(dk+'T12:00:00'),ds=pts3.reduce((s,p)=>s+p.durationSec,0);h+=`<div class="rd-header">${DF[d.getDay()]} ${dk} — ${pts3.length} pts · ${fd(ds)}</div>`;pts3.forEach(p=>{let tg=[];if(p.newPt)tg.push('NEW');if(p.translator)tg.push('XLAT');if(p.complexity)tg.push('CX:'+p.complexity);let tagStr=tg.length?' <span style="font-size:.7rem">['+tg.join('+')+']</span>':'';let ct=(p.chartSec!=null)?` <span style="color:var(--amber);font-size:.7rem">📋${fd(p.chartSec)}</span>`:'';h+=`<div class="rd-pt"><span>#${p.num} ${p.time}${tagStr}</span><span class="rd-v">${fd(p.durationSec)}${ct}</span></div>`});if(weekNotes[dk])h+=`<div style="padding:3px 12px;font-size:.75rem;color:var(--text-light);font-style:italic">📝 ${weekNotes[dk].replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`});h+='</div>';$('reportContent').innerHTML=h;$('reportModal').classList.add('show')}
+function closeReport(){$('reportModal').classList.remove('show')}
+function copyReport(){const all=gap(),sorted=Object.keys(weekData).sort(),totalSec=all.reduce((s,p)=>s+p.durationSec,0),avg=all.length?Math.round(totalSec/all.length):0,charted=all.filter(p=>p.chartSec!=null),avgChart=charted.length?Math.round(charted.reduce((s,p)=>s+p.chartSec,0)/charted.length):0,newPts=all.filter(p=>p.newPt),xlatPts=all.filter(p=>p.translator);let nptTotal=0;Object.values(nptData).flat().forEach(n=>nptTotal+=n.durationSec);
+let t=`WEEKLY PATIENT REPORT\n${new Date().toLocaleDateString()}\n${'─'.repeat(40)}\nPatients: ${all.length}  Care: ${fd(totalSec)}  Avg: ${fd(avg)}  Chart: ${charted.length?fd(avgChart):'—'}  NPT: ${fd(nptTotal)}\nNew: ${newPts.length}  Translator: ${xlatPts.length}\n`;const cxB={};all.forEach(p=>{const c=p.complexity||0;if(!cxB[c])cxB[c]={n:0,s:0};cxB[c].n++;cxB[c].s+=p.durationSec});if(Object.keys(cxB).length>1||!cxB['0']){t+='\nCOMPLEXITY\n';Object.keys(cxB).sort().forEach(k=>{const b=cxB[k];t+=`  ${k==='0'?'Unrated':'CX '+k}: ${b.n} pts · ${fd(Math.round(b.s/b.n))} avg\n`})}t+=`\n${'─'.repeat(40)}\nDAILY\n${'─'.repeat(40)}\n`;sorted.forEach(dk=>{const pts3=weekData[dk],d=new Date(dk+'T12:00:00');t+=`\n${DF[d.getDay()]} ${dk} — ${pts3.length} pts · ${fd(pts3.reduce((s,p)=>s+p.durationSec,0))}\n`;pts3.forEach(p=>{let tg=[];if(p.newPt)tg.push('NEW');if(p.translator)tg.push('XLAT');if(p.complexity)tg.push('CX:'+p.complexity);let ct=(p.chartSec!=null)?` 📋${fd(p.chartSec)}`:'';t+=`  #${p.num} ${p.time} ${fd(p.durationSec)}${ct}${tg.length?' ['+tg.join('+')+']':''}\n`});if(weekNotes[dk])t+=`  📝 ${weekNotes[dk].trim()}\n`});navigator.clipboard.writeText(t).then(()=>{$('copyBtn').textContent='✓ COPIED';$('copyBtn').classList.add('copied');setTimeout(()=>{$('copyBtn').textContent='📋 COPY TO CLIPBOARD';$('copyBtn').classList.remove('copied')},2000)}).catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);$('copyBtn').textContent='✓ COPIED';setTimeout(()=>$('copyBtn').textContent='📋 COPY TO CLIPBOARD',2000)})}
+function confirmReset(){if(!gap().length){weekData={};weekNotes={};nptData={};save();renderLog();$('workNotes').value='';return}const b=$('resetWeekBtn');if(b.dataset.c){weekData={};weekNotes={};nptData={};activePatients=[];save();renderLog();renderActive();renderNptLog();$('workNotes').value='';b.textContent='↺ Reset Week';b.style.borderColor='';b.style.color='';delete b.dataset.c}else{b.dataset.c='1';b.textContent='⚠ Tap Again';b.style.borderColor='var(--red)';b.style.color='var(--red)';setTimeout(()=>{if(b.dataset.c){b.textContent='↺ Reset Week';b.style.borderColor='';b.style.color='';delete b.dataset.c}},3000)}}
+function initCollapsible(){let cl={};try{const r=localStorage.getItem('ccCol');if(r)cl=JSON.parse(r)}catch(x){}document.querySelectorAll('.panel').forEach((p,i)=>{const id='p'+i;p.dataset.pid=id;if(cl[id])p.classList.add('collapsed');const hd=p.querySelector('.panel-header');if(hd)hd.addEventListener('click',()=>{p.classList.toggle('collapsed');const st={};document.querySelectorAll('.panel').forEach(p2=>{if(p2.dataset.pid&&p2.classList.contains('collapsed'))st[p2.dataset.pid]=true});try{localStorage.setItem('ccCol',JSON.stringify(st))}catch(x){}})})}
+load();$('targetInput').value=dailyTarget;renderPhases();renderLog();renderNptCats();renderNptLog();initCollapsible();$('workNotes').value=weekNotes[tk()]||'';updateClock();updatePhase();setInterval(updateClock,1000);setInterval(updateProj,60000);
+window.W={showNewPtForm,setCx,launchPt,pausePt,resumePt,completePt,closeChart,cancelPt,editDur,removePt,toggleManual,saveManual,saveTarget,saveNotes,selectPhase,setPreset,toggleTimer,resetTimer,dismissAlert,showReport,closeReport,copyReport,confirmReset,nptSetCat,nptToggle,nptStop,nptRemove};
+})();
+</script>
+</body>
+</html>
