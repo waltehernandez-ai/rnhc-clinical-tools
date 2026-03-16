@@ -3,301 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>ClinForge Tools</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230D9488'/><path d='M16 8v16M8 16h16' stroke='white' stroke-width='2.5' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 <style>
-:root {
-  --navy: #163B5C;
-  --navy-deep: #0E2640;
-  --teal: #0B7A7D;
-  --teal-light: #E0F7F6;
-  --bg: #F8F9FB;
-  --surface: #FFFFFF;
-  --text: #1A1A2E;
-  --text-mid: #4A4A5A;
-  --text-light: #7A7A8A;
-  --border: #E2E4EA;
-  --radius: 14px;
-  --radius-sm: 10px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
-  --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 12px 40px rgba(0,0,0,0.06);
-  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'DM Sans', system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-/* Header */
-.header {
-  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 50%, var(--teal) 100%);
-  padding: 3rem 1.5rem 2.5rem;
-  color: white;
+/* === Index-specific styles === */
+.index-header {
+  padding: 56px 24px 48px;
   text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.header::before {
-  content: '';
-  position: absolute;
-  top: -60%; right: -15%;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(11,122,125,0.15) 0%, transparent 70%);
-  border-radius: 50%;
-}
-.header::after {
-  content: '';
-  position: absolute;
-  bottom: -40%; left: -10%;
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
-  border-radius: 50%;
-}
-.header-inner {
-  max-width: 600px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-}
-.header .icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
-  display: block;
-}
-.header h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  margin-bottom: 0.4rem;
-}
-.header .subtitle {
-  font-size: 1rem;
-  opacity: 0.8;
-  font-weight: 400;
-}
-.header .meta {
-  margin-top: 1rem;
-  font-size: 0.78rem;
-  opacity: 0.5;
 }
 
-/* Container */
-.container {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 3rem;
-}
-
-/* Section label */
-.section-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-light);
-  margin-bottom: 0.75rem;
-}
-
-/* Tool cards */
-.tool-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  text-decoration: none;
-  color: var(--text);
-  transition: all var(--transition);
-  cursor: pointer;
-}
-.tool-card:hover {
-  box-shadow: var(--shadow-lg);
-  border-color: var(--teal);
-  transform: translateY(-2px);
-}
-.tool-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-sm);
-  display: flex;
+.index-header__icon {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
-  flex-shrink: 0;
-}
-.tool-content {
-  flex: 1;
-}
-.tool-name {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--navy);
-  margin-bottom: 0.15rem;
-}
-.tool-desc {
-  font-size: 0.82rem;
-  color: var(--text-mid);
-  line-height: 1.4;
-}
-.tool-version {
-  font-size: 0.72rem;
-  color: var(--text-light);
-  margin-top: 0.2rem;
-}
-.tool-arrow {
-  color: var(--text-light);
-  font-size: 1.1rem;
-  flex-shrink: 0;
-  transition: transform var(--transition);
-}
-.tool-card:hover .tool-arrow {
-  transform: translateX(4px);
-  color: var(--teal);
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--accent-subtle);
+  font-size: 1.5rem;
+  margin-bottom: 20px;
 }
 
-/* Coming soon cards */
-.tool-card.coming-soon {
-  opacity: 0.5;
-  cursor: default;
-}
-.tool-card.coming-soon:hover {
-  box-shadow: var(--shadow);
-  border-color: var(--border);
-  transform: none;
-}
-.coming-badge {
-  font-size: 0.68rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-light);
-  background: var(--bg);
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  border: 1px solid var(--border);
+.index-header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--slate-900);
+  margin-bottom: 8px;
 }
 
-/* Footer */
-.footer {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 0 1.5rem 2rem;
-  text-align: center;
+.index-header__subtitle {
+  font-size: 1.0625rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.index-header__meta {
+  margin-top: 12px;
   font-size: 0.75rem;
-  color: var(--text-light);
-  line-height: 1.6;
-}
-.footer a {
-  color: var(--teal);
-  text-decoration: none;
+  color: var(--text-tertiary);
 }
 
-@media (max-width: 500px) {
-  .header h1 { font-size: 1.5rem; }
-  .header { padding: 2rem 1.5rem 1.8rem; }
-  .container { padding: 1.5rem 1rem; }
-  .tool-card { padding: 1rem 1.25rem; }
+.tools-section {
+  margin-bottom: 40px;
+}
+
+/* Icon tints */
+.icon-teal    { background: #CCFBF1; color: #0F766E; }
+.icon-purple  { background: #F3E8FF; color: #7C3AED; }
+.icon-green   { background: #DCFCE7; color: #16A34A; }
+.icon-orange  { background: #FFF7ED; color: #C2410C; }
+.icon-red     { background: #FEF2F2; color: #DC2626; }
+
+/* Divider between sections */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 32px 0 24px;
+}
+
+/* Inline critical fallback styles (standalone capability) */
+@supports not (--a: 0) {
+  body { font-family: system-ui, sans-serif; background: #FAFAF9; color: #0F172A; }
+  .tool-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; text-decoration: none; color: #0F172A; }
 }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-inner">
-    <span class="icon">⚙️</span>
-    <h1>ClinForge Tools</h1>
-    <div class="subtitle">Interactive clinical decision support</div>
-    <div class="meta">Personal reference tools · Not institutionally endorsed</div>
+<header class="index-header">
+  <div class="index-header__icon">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent);">
+      <path d="M12 3v18M3 12h18"/>
+    </svg>
   </div>
-</div>
+  <h1>ClinForge Tools</h1>
+  <p class="index-header__subtitle">Interactive clinical decision support</p>
+  <p class="index-header__meta">Personal reference tools · Not institutionally endorsed</p>
+</header>
 
-<div class="container">
+<main class="container container--wide">
 
-  <div class="section-label">Available Tools</div>
+  <section class="tools-section">
+    <div class="section-label">Available Tools</div>
 
-  <a class="tool-card" href="cystatin-c.html">
-    <div class="tool-icon" style="background:#E0F7F6;color:#0B7A7D;">🧪</div>
-    <div class="tool-content">
-      <div class="tool-name">Cystatin C Ordering Decision Tool</div>
-      <div class="tool-desc">Guideline-based algorithm for when to order cystatin C, contraindication screening, built-in CKD-EPI 2021 eGFR calculator, and clinical reference.</div>
-      <div class="tool-version">v2.3 · March 2026 · KDIGO 2024 / NKF-KDOQI 2025 / VA-DoD 2025</div>
+    <a class="tool-card stagger-in" href="cystatin-c.html">
+      <div class="tool-icon icon-teal">🧪</div>
+      <div class="tool-content">
+        <div class="tool-name">Cystatin C Ordering Decision Tool</div>
+        <div class="tool-desc">Guideline-based algorithm for when to order cystatin C, contraindication screening, built-in CKD-EPI 2021 eGFR calculator, and clinical reference.</div>
+        <div class="tool-version">v2.3 · March 2026 · KDIGO 2024 / NKF-KDOQI 2025 / VA-DoD 2025</div>
+      </div>
+      <svg class="tool-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l6 6-6 6"/></svg>
+    </a>
+
+    <a class="tool-card stagger-in" href="command-center.html">
+      <div class="tool-icon icon-teal">⏱</div>
+      <div class="tool-content">
+        <div class="tool-name">Command Center</div>
+        <div class="tool-desc">Productivity dashboard with concurrent patient timers, complexity tracking, split visit/chart timers, finish-time projections, and non-patient time logging.</div>
+        <div class="tool-version">v3.1 · March 2026</div>
+      </div>
+      <svg class="tool-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l6 6-6 6"/></svg>
+    </a>
+
+    <a class="tool-card stagger-in" href="nabla-setup.html">
+      <div class="tool-icon icon-purple">🎙️</div>
+      <div class="tool-content">
+        <div class="tool-name">Nabla Setup Tool</div>
+        <div class="tool-desc">Generate custom Nabla Copilot instructions via note analysis, step-by-step questionnaire, or section troubleshooter. BYOK for AI features.</div>
+        <div class="tool-version">v2.0 · March 2026</div>
+      </div>
+      <svg class="tool-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l6 6-6 6"/></svg>
+    </a>
+
+    <a class="tool-card stagger-in" href="avs-smartphrase.html">
+      <div class="tool-icon icon-green">📄</div>
+      <div class="tool-content">
+        <div class="tool-name">AVS SmartPhrase Excel Generator</div>
+        <div class="tool-desc">Build Epic-compatible AVS resource directories with form or paste input. Generates styled .xlsx for SmartPhrase paste.</div>
+        <div class="tool-version">v1.0 · March 2026</div>
+      </div>
+      <svg class="tool-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l6 6-6 6"/></svg>
+    </a>
+  </section>
+
+  <hr class="section-divider">
+
+  <section class="tools-section">
+    <div class="section-label">Coming Soon</div>
+
+    <div class="tool-card tool-card--disabled stagger-in">
+      <div class="tool-icon icon-purple">💊</div>
+      <div class="tool-content">
+        <div class="tool-name">GLP-1 Prescribing Guide</div>
+        <div class="tool-desc">Medi-Cal Rx coverage, PA pathways, and insurance-based prescribing algorithm.</div>
+      </div>
+      <span class="coming-badge">Coming soon</span>
     </div>
-    <div class="tool-arrow">→</div>
-  </a>
 
-  <a class="tool-card" href="command-center.html">
-    <div class="tool-icon" style="background:#E0F7F6;color:#0B7A7D;">⏱</div>
-    <div class="tool-content">
-      <div class="tool-name">Command Center</div>
-      <div class="tool-desc">Productivity dashboard with concurrent patient timers, complexity tracking, split visit/chart timers, finish-time projections, and non-patient time logging.</div>
-      <div class="tool-version">v3.1 · March 2026</div>
+    <div class="tool-card tool-card--disabled stagger-in">
+      <div class="tool-icon icon-orange">📋</div>
+      <div class="tool-content">
+        <div class="tool-name">Positive Cologuard Referral Algorithm</div>
+        <div class="tool-desc">Insurance-based referral routing for positive FIT/Cologuard results.</div>
+      </div>
+      <span class="coming-badge">Coming soon</span>
     </div>
-    <div class="tool-arrow">→</div>
-  </a>
 
-  <a class="tool-card" href="nabla-setup.html">
-    <div class="tool-icon" style="background:#F0E6F9;color:#5B2C8A;">🎙️</div>
-    <div class="tool-content">
-      <div class="tool-name">Nabla Setup Tool</div>
-      <div class="tool-desc">Generate custom Nabla Copilot instructions via note analysis, step-by-step questionnaire, or section troubleshooter. BYOK for AI features.</div>
-      <div class="tool-version">v2.0 · March 2026</div>
+    <div class="tool-card tool-card--disabled stagger-in">
+      <div class="tool-icon icon-red">🔬</div>
+      <div class="tool-content">
+        <div class="tool-name">STI Screening & PrEP Pathway</div>
+        <div class="tool-desc">Screening criteria, PrEP eligibility, and EIP referral routing.</div>
+      </div>
+      <span class="coming-badge">Coming soon</span>
     </div>
-    <div class="tool-arrow">→</div>
-  </a>
+  </section>
 
-  <a class="tool-card" href="avs-smartphrase.html">
-    <div class="tool-icon" style="background:#E3F4E8;color:#1B7A3D;">📄</div>
-    <div class="tool-content">
-      <div class="tool-name">AVS SmartPhrase Excel Generator</div>
-      <div class="tool-desc">Build Epic-compatible AVS resource directories with form or paste input. Generates styled .xlsx for SmartPhrase paste.</div>
-      <div class="tool-version">v1.0 · March 2026</div>
-    </div>
-    <div class="tool-arrow">→</div>
-  </a>
+</main>
 
-  <div class="section-label" style="margin-top:2rem;">Coming Soon</div>
-
-  <div class="tool-card coming-soon">
-    <div class="tool-icon" style="background:#F0E6F9;color:#5B2C8A;">💊</div>
-    <div class="tool-content">
-      <div class="tool-name">GLP-1 Prescribing Guide</div>
-      <div class="tool-desc">Medi-Cal Rx coverage, PA pathways, and insurance-based prescribing algorithm.</div>
-    </div>
-    <span class="coming-badge">Coming soon</span>
-  </div>
-
-  <div class="tool-card coming-soon">
-    <div class="tool-icon" style="background:#FFF0E0;color:#C65100;">📋</div>
-    <div class="tool-content">
-      <div class="tool-name">Positive Cologuard Referral Algorithm</div>
-      <div class="tool-desc">Insurance-based referral routing for positive FIT/Cologuard results.</div>
-    </div>
-    <span class="coming-badge">Coming soon</span>
-  </div>
-
-  <div class="tool-card coming-soon">
-    <div class="tool-icon" style="background:#FDEAEA;color:#A12B2B;">🔬</div>
-    <div class="tool-content">
-      <div class="tool-name">STI Screening & PrEP Pathway</div>
-      <div class="tool-desc">Screening criteria, PrEP eligibility, and EIP referral routing.</div>
-    </div>
-    <span class="coming-badge">Coming soon</span>
-  </div>
-
-</div>
-
-<div class="footer">
-  <strong>Disclaimer:</strong> These are personal clinical reference tools created by an individual clinician. They are not institutionally endorsed, reviewed, or maintained by any healthcare organization. They do not constitute medical advice. Always use clinical judgment and verify against current guidelines before making patient care decisions.<br><br>
-  Walter Hernandez, MSN, MPH, FNP-C · <a href="https://github.com/waltehernandez-ai/rnhc-clinical-tools" target="_blank">View on GitHub</a>
-</div>
+<footer class="site-footer">
+  <p class="site-footer__disclaimer">
+    <strong>Disclaimer:</strong> These are personal clinical reference tools created by an individual clinician. They are not institutionally endorsed, reviewed, or maintained by any healthcare organization. They do not constitute medical advice. Always use clinical judgment and verify against current guidelines before making patient care decisions.
+  </p>
+  <p class="site-footer__meta">
+    Walter Hernandez, MSN, MPH, FNP-C · <a href="https://github.com/waltehernandez-ai/rnhc-clinical-tools" target="_blank">View on GitHub</a>
+  </p>
+</footer>
 
 </body>
 </html>
