@@ -1,0 +1,662 @@
+<!--
+  ClinForge Tool Metadata
+  Name: AVS SmartPhrase Excel Generator
+  Version: v1.0
+  Date: 2026-03-16
+  Risk Tier: LOW
+  Sources: Epic formatting verification (2026-02-10), ClinForge AVS Module v2.0
+  Confidence: CURRENT
+  Last Verified: 2026-03-16
+  Verified Via: N/A (formatting tool — no clinical content)
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AVS SmartPhrase Excel Generator — ClinForge clinical reference tool">
+  <meta name="author" content="Walter Hernandez, MSN, MPH, FNP-C">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+  <title>AVS SmartPhrase Excel Generator — ClinForge</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+  <style>
+    :root {
+      --navy: #163B5C;
+      --navy-deep: #0E2640;
+      --teal: #0B7A7D;
+      --teal-light: #E0F7F6;
+      --green: #1B7A3D;
+      --green-light: #E3F4E8;
+      --orange: #C65100;
+      --orange-light: #FFF0E0;
+      --red: #A12B2B;
+      --red-light: #FDEAEA;
+      --amber: #B8860B;
+      --amber-light: #FFF8E1;
+      --bg: #F8F9FB;
+      --surface: #FFFFFF;
+      --text: #1A1A2E;
+      --text-mid: #4A4A5A;
+      --text-light: #7A7A8A;
+      --border: #E2E4EA;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; line-height: 1.6;
+      color: var(--text); background: var(--bg);
+    }
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--navy-deep);
+      padding: 12px 24px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .nav-title { color: #fff; font-weight: 700; font-size: 1rem; white-space: nowrap; }
+    .nav-tabs { display: flex; gap: 4px; margin-left: auto; }
+    .nav-tab {
+      background: transparent; border: none;
+      color: rgba(255,255,255,0.6); font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 600;
+      padding: 8px 16px; border-radius: 6px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .nav-tab.active { color: #fff; background: var(--teal); }
+    .main { max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    }
+    .card-title { font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 16px; }
+    label {
+      display: block; font-weight: 600; font-size: 0.85rem;
+      color: var(--text-mid); margin-bottom: 4px; margin-top: 12px;
+    }
+    label:first-child { margin-top: 0; }
+    input[type="text"], textarea, select {
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+      color: var(--text); background: var(--bg); transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none; border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(11,122,125,0.1);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    .hint { font-size: 0.78rem; color: var(--text-light); margin-top: 2px; }
+    .location-entry {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px; margin-bottom: 12px; position: relative;
+    }
+    .entry-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+    }
+    .entry-num { font-weight: 700; font-size: 0.85rem; color: var(--teal); }
+    .remove-btn {
+      background: var(--red-light); color: var(--red);
+      border: none; border-radius: 6px; padding: 4px 10px;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    }
+    .remove-btn:hover { background: var(--red); color: #fff; }
+    .location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+    .location-grid .full-width { grid-column: 1 / -1; }
+    .section-entry {
+      background: var(--amber-light); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 16px; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-badge {
+      background: var(--amber); color: #fff;
+      font-size: 0.7rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 4px; white-space: nowrap;
+    }
+    .section-entry input { flex: 1; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+      font-weight: 600; cursor: pointer; border: none; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--teal); color: #fff; }
+    .btn-primary:hover { background: #096668; }
+    .btn-secondary { background: var(--bg); color: var(--teal); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--teal-light); }
+    .btn-accent { background: var(--navy); color: #fff; }
+    .btn-accent:hover { background: var(--navy-deep); }
+    .btn-sm { padding: 6px 14px; font-size: 0.78rem; }
+    .btn-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .btn-generate {
+      background: var(--green); color: #fff;
+      padding: 14px 32px; font-size: 1rem; font-weight: 700;
+      border-radius: 10px; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all 0.2s; width: 100%;
+    }
+    .btn-generate:hover { background: #156b32; }
+    .paste-area {
+      width: 100%; min-height: 300px; padding: 16px;
+      border: 2px dashed var(--border); border-radius: 12px;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+      line-height: 1.5; color: var(--text); background: var(--surface); resize: vertical;
+    }
+    .paste-area:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(11,122,125,0.1); outline: none; }
+    .preview-table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 10px; }
+    .preview-table td { border: 1px solid #ccc; padding: 8px 10px; vertical-align: top; }
+    .preview-table .hdr { background: #0E2640; color: #fff; text-align: center; font-weight: 700; font-size: 14px; padding: 12px; }
+    .preview-table .ph { text-align: center; padding: 8px; }
+    .preview-table .ph span { color: #0000FF; font-weight: 700; font-size: 12px; }
+    .preview-table .sub { text-align: center; font-weight: 700; font-size: 11px; padding: 6px; }
+    .preview-table .stx { text-align: center; font-style: italic; color: #4A4A5A; padding: 4px; }
+    .preview-table .sec { background: #D9D9D9; font-weight: 700; text-align: center; font-size: 11px; padding: 8px; }
+    .preview-table .ftr { text-align: center; font-size: 9px; color: #4A4A5A; padding: 6px; }
+    .preview-table .tag { text-align: center; font-weight: 700; font-style: italic; padding: 8px; }
+    .preview-table .ln { font-weight: 700; }
+    .preview-table .lp { color: #0000FF; font-weight: 700; }
+    .status-bar {
+      background: var(--amber-light); border: 1px solid var(--amber);
+      border-radius: 8px; padding: 10px 16px; font-size: 0.82rem;
+      color: var(--amber); font-weight: 600; margin-bottom: 16px; display: none;
+    }
+    .status-bar.error { background: var(--red-light); border-color: var(--red); color: var(--red); }
+    .status-bar.success { background: var(--green-light); border-color: var(--green); color: var(--green); }
+    .status-bar.visible { display: block; }
+    .ref-block {
+      background: var(--bg); border-left: 3px solid var(--teal);
+      padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 12px;
+    }
+    .ref-block-title { font-weight: 700; font-size: 0.85rem; color: var(--navy); margin-bottom: 4px; }
+    .ref-block code {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+      background: var(--surface); padding: 1px 6px; border-radius: 4px;
+    }
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--green); color: #fff;
+      padding: 12px 24px; border-radius: 8px;
+      font-weight: 600; font-size: 0.85rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transform: translateY(100px); opacity: 0;
+      transition: all 0.3s ease; z-index: 200;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .footer {
+      max-width: 900px; margin: 0 auto; padding: 24px 16px;
+      text-align: center; font-size: 0.75rem; line-height: 1.5; color: var(--text-light);
+    }
+    .footer a { color: var(--teal); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+    .drag-handle { cursor: grab; color: var(--text-light); font-size: 1.1rem; user-select: none; padding: 0 4px; }
+    .drag-handle:active { cursor: grabbing; }
+    .dragging { opacity: 0.4; }
+    .drag-over { border-top: 3px solid var(--teal) !important; }
+    @media (max-width: 600px) {
+      .nav { padding: 10px 12px; flex-wrap: wrap; }
+      .nav-tabs { margin-left: 0; width: 100%; overflow-x: auto; }
+      .main { padding: 16px 10px 64px; }
+      .card { padding: 16px; }
+      .location-grid { grid-template-columns: 1fr; }
+      .btn-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <span class="nav-title">📄 AVS SmartPhrase Generator</span>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('form')">Form</button>
+    <button class="nav-tab" onclick="switchTab('paste')">Paste</button>
+    <button class="nav-tab" onclick="switchTab('preview')">Preview</button>
+    <button class="nav-tab" onclick="switchTab('reference')">Reference</button>
+  </div>
+</nav>
+<div class="main">
+  <!-- FORM TAB -->
+  <div id="tab-form" class="tab-content active">
+    <div class="card">
+      <div class="card-title">Header</div>
+      <label for="sp-name">SmartPhrase Name</label>
+      <input type="text" id="sp-name" placeholder=".wwavstopic" value=".wwavs">
+      <p class="hint">Naming: .wwavs[topic] — e.g., .wwavsiehpeducation</p>
+      <label for="sp-title">Title</label>
+      <input type="text" id="sp-title" placeholder="Resource Directory Title">
+      <label for="sp-phone">Hotline / Main Phone (optional)</label>
+      <input type="text" id="sp-phone" placeholder="(951) 555-1234">
+      <label for="sp-subtitle">Subtitle (optional)</label>
+      <input type="text" id="sp-subtitle" placeholder="">
+      <label for="sp-subtext">Subtext (optional)</label>
+      <input type="text" id="sp-subtext" placeholder="Italic subtext line">
+    </div>
+    <div class="card">
+      <div class="card-title">Entries</div>
+      <p class="hint" style="margin-bottom:12px">Add locations and section dividers. Drag ⠿ to reorder.</p>
+      <div id="entries-container"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="addLocation()">+ Location</button>
+        <button class="btn btn-secondary btn-sm" onclick="addSection()">+ Section Divider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Footer</div>
+      <label for="sp-footer">Footer Text (optional)</label>
+      <textarea id="sp-footer" rows="2" placeholder="Admin info, hours, notes..."></textarea>
+      <label for="sp-tagline">Tagline (optional)</label>
+      <input type="text" id="sp-tagline" placeholder="Bold italic tagline at bottom">
+    </div>
+    <div class="card">
+      <div class="card-title">Settings</div>
+      <label for="sp-cols">Column Layout</label>
+      <select id="sp-cols">
+        <option value="2">2-column (side-by-side locations)</option>
+        <option value="1">1-column (full-width entries)</option>
+      </select>
+      <p class="hint">2-column verified for Epic paste. Use 1-column for lengthy entries.</p>
+    </div>
+    <div id="form-status" class="status-bar"></div>
+    <button class="btn-generate" onclick="generateFromForm()">Generate Excel (.xlsx)</button>
+  </div>
+  <!-- PASTE TAB -->
+  <div id="tab-paste" class="tab-content">
+    <div class="card">
+      <div class="card-title">Paste Raw Content</div>
+      <p class="hint" style="margin-bottom:12px">
+        Paste structured text — one location per block, blank lines between.
+        Start a line with <code>---</code> for a section divider.
+      </p>
+      <textarea class="paste-area" id="paste-input" placeholder="TITLE: My Resource Directory
+PHONE: (951) 555-1234
+SUBTITLE: Optional subtitle
+SMARTPHRASE: .wwavsexample
+Location Name
+123 Main St, City, CA 92501
+(951) 555-0001
+Mon-Fri 8am-5pm
+Another Location
+456 Oak Ave, City, CA 92502
+(951) 555-0002
+Mon-Fri 9am-6pm
+--- Specialty Resources
+Specialty Clinic
+789 Pine Blvd, City, CA 92503
+(951) 555-0003
+By appointment only
+FOOTER: Call for more information
+TAGLINE: Your health is our priority"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="parseAndGenerate()">Parse &amp; Generate Excel</button>
+        <button class="btn btn-secondary" onclick="parseAndPreview()">Parse &amp; Preview</button>
+        <button class="btn btn-secondary" onclick="clearPaste()">Clear</button>
+      </div>
+      <div id="paste-status" class="status-bar" style="margin-top:12px"></div>
+    </div>
+  </div>
+  <!-- PREVIEW TAB -->
+  <div id="tab-preview" class="tab-content">
+    <div class="card">
+      <div class="card-title">Preview</div>
+      <p class="hint" style="margin-bottom:12px">Approximate preview of the Excel output. Mirrors Epic paste formatting.</p>
+      <div id="preview-container">
+        <p style="color:var(--text-light);font-style:italic;">No content yet. Use Form or Paste tab first.</p>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-accent" onclick="generateFromPreview()">Download Excel (.xlsx)</button>
+    </div>
+  </div>
+  <!-- REFERENCE TAB -->
+  <div id="tab-reference" class="tab-content">
+    <div class="card">
+      <div class="card-title">Epic Paste Workflow</div>
+      <div class="ref-block">
+        <div class="ref-block-title">Steps</div>
+        <p>1. Open .xlsx in <strong>Excel</strong> (not Google Sheets)<br>
+        2. Select all (Ctrl+A) &rarr; Copy (Ctrl+C)<br>
+        3. Paste into Epic SmartPhrase editor or Patient Instructions<br>
+        4. Verify formatting &rarr; Save SmartPhrase</p>
+      </div>
+      <div class="ref-block">
+        <div class="ref-block-title">Epic-Safe Formatting (verified 2026-02-10)</div>
+        <p><strong>Confirmed:</strong> Bold, Italic, Bold+Italic, Blue font (phones), Red font (warnings), Thin borders, Gray fill (section dividers), Merged cells, Center alignment, Wrap text, 2-column layout</p>
+        <p style="margin-top:8px"><strong>Avoid:</strong> Background highlighting on text, &gt;2 columns, Complex nested merges, Images</p>
+      </div>
+      <div class="ref-block">
+        <div class="ref-block-title">Naming Convention</div>
+        <p><code>.wwavs[topic]</code> &mdash; e.g., <code>.wwavsiehpeducation</code> &middot; <code>.wwavsradnetxray</code></p>
+      </div>
+      <div class="ref-block">
+        <div class="ref-block-title">Build Standards</div>
+        <p>Font: Arial &middot; Body: 10pt &middot; Headers: 11&ndash;14pt bold<br>
+        Phones: Bold + Blue (#0000FF) &middot; Warnings: Bold + Red (#FF0000)<br>
+        Columns: ~48 char width &middot; Row height: 85px for location blocks<br>
+        Section dividers: Full-row merge, gray fill (#D9D9D9), bold</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Tool Info</div>
+      <p style="font-size:0.82rem;color:var(--text-mid);">
+        v1.0 &middot; March 2026 &middot; Generates styled .xlsx in-browser via ExcelJS.<br>
+        No data sent to any server. All processing is local.
+      </p>
+    </div>
+  </div>
+</div>
+<footer class="footer">
+  <p>Disclaimer: These are personal clinical reference tools created by an individual clinician. They are not institutionally endorsed, reviewed, or maintained by any healthcare organization. They do not constitute medical advice and should not be used as the sole basis for clinical decisions. Always use clinical judgment and verify against current guidelines before making patient care decisions. The author assumes no liability for clinical outcomes resulting from use of these tools.</p>
+  <p style="margin-top:8px;font-weight:600;">Walter Hernandez, MSN, MPH, FNP-C</p>
+  <p style="margin-top:8px;"><a href="index.html">&larr; Back to ClinForge Tools</a></p>
+</footer>
+<div class="toast" id="toast"></div>
+<script>
+// ===== STATE =====
+let entries = [];
+let entryCounter = 0;
+let lastBuildData = null;
+// ===== TABS =====
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelector('.nav-tab[onclick="switchTab(\'' + id + '\')"]').classList.add('active');
+  if (id === 'preview') renderPreview();
+}
+function showToast(msg, ms) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), ms || 3000);
+}
+function showStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.className = 'status-bar visible ' + (type || '');
+}
+function hideStatus(id) { document.getElementById(id).className = 'status-bar'; }
+// ===== ENTRY MANAGEMENT =====
+function addLocation(data) {
+  entries.push({ type: 'location', id: ++entryCounter, data: data || {} });
+  renderEntries();
+}
+function addSection(title) {
+  entries.push({ type: 'section', id: ++entryCounter, data: { title: title || '' } });
+  renderEntries();
+}
+function removeEntry(id) {
+  entries = entries.filter(e => e.id !== id);
+  renderEntries();
+}
+function renderEntries() {
+  const c = document.getElementById('entries-container');
+  c.innerHTML = '';
+  let locNum = 0;
+  entries.forEach((entry, idx) => {
+    const w = document.createElement('div');
+    w.dataset.idx = idx;
+    w.draggable = true;
+    if (entry.type === 'section') {
+      w.className = 'section-entry';
+      w.innerHTML = '<span class="drag-handle" title="Drag to reorder">⠿</span>'
+        + '<span class="section-badge">SECTION</span>'
+        + '<input type="text" value="' + esc(entry.data.title) + '" placeholder="Section title" onchange="entries[' + idx + '].data.title=this.value">'
+        + '<button class="remove-btn" onclick="removeEntry(' + entry.id + ')">✕</button>';
+    } else {
+      locNum++;
+      const d = entry.data;
+      w.className = 'location-entry';
+      w.innerHTML = '<div class="entry-header">'
+        + '<span class="drag-handle" title="Drag to reorder">⠿</span>'
+        + '<span class="entry-num">Location ' + locNum + '</span>'
+        + '<button class="remove-btn" onclick="removeEntry(' + entry.id + ')">Remove</button>'
+        + '</div>'
+        + '<div class="location-grid">'
+        + '<div class="full-width"><label>Name *</label><input type="text" value="' + esc(d.name||'') + '" placeholder="Clinic / Resource Name" onchange="entries[' + idx + '].data.name=this.value"></div>'
+        + '<div class="full-width"><label>Address</label><input type="text" value="' + esc(d.address||'') + '" placeholder="123 Main St, City, CA 92501" onchange="entries[' + idx + '].data.address=this.value"></div>'
+        + '<div><label>Phone</label><input type="text" value="' + esc(d.phone||'') + '" placeholder="(951) 555-1234" onchange="entries[' + idx + '].data.phone=this.value"></div>'
+        + '<div><label>Fax</label><input type="text" value="' + esc(d.fax||'') + '" placeholder="(951) 555-1235" onchange="entries[' + idx + '].data.fax=this.value"></div>'
+        + '<div><label>Hours</label><input type="text" value="' + esc(d.hours||'') + '" placeholder="Mon-Fri 8am-5pm" onchange="entries[' + idx + '].data.hours=this.value"></div>'
+        + '<div><label>Notes</label><input type="text" value="' + esc(d.notes||'') + '" placeholder="Walk-ins welcome" onchange="entries[' + idx + '].data.notes=this.value"></div>'
+        + '</div>';
+    }
+    // Drag
+    w.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', idx); w.classList.add('dragging'); });
+    w.addEventListener('dragend', () => w.classList.remove('dragging'));
+    w.addEventListener('dragover', e => { e.preventDefault(); w.classList.add('drag-over'); });
+    w.addEventListener('dragleave', () => w.classList.remove('drag-over'));
+    w.addEventListener('drop', e => {
+      e.preventDefault(); w.classList.remove('drag-over');
+      const from = parseInt(e.dataTransfer.getData('text/plain'));
+      const to = idx;
+      if (from !== to) { const item = entries.splice(from, 1)[0]; entries.splice(to, 0, item); renderEntries(); }
+    });
+    c.appendChild(w);
+  });
+}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function esc2(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+addLocation(); addLocation();
+// ===== GATHER DATA =====
+function gatherFormData() {
+  return {
+    name: document.getElementById('sp-name').value.trim(),
+    title: document.getElementById('sp-title').value.trim(),
+    phone: document.getElementById('sp-phone').value.trim(),
+    subtitle: document.getElementById('sp-subtitle').value.trim(),
+    subtext: document.getElementById('sp-subtext').value.trim(),
+    footer: document.getElementById('sp-footer').value.trim(),
+    tagline: document.getElementById('sp-tagline').value.trim(),
+    cols: parseInt(document.getElementById('sp-cols').value),
+    entries: entries.map(e => ({ ...e, data: { ...e.data } }))
+  };
+}
+// ===== PASTE PARSER =====
+function parsePaste(text) {
+  const lines = text.split('\n');
+  const data = { name:'', title:'', phone:'', subtitle:'', subtext:'', footer:'', tagline:'', cols:2, entries:[] };
+  let block = [], eid = 0;
+  function flush() {
+    if (!block.length) return;
+    const bl = block.map(l=>l.trim()).filter(Boolean);
+    block = [];
+    if (!bl.length) return;
+    const loc = { name: bl[0] };
+    for (let i = 1; i < bl.length; i++) {
+      const l = bl[i];
+      if (/^\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/.test(l) && !loc.phone) loc.phone = l;
+      else if (/\d+.*\b[A-Z]{2}\b.*\d{5}/.test(l) || /\d+\s+\w+\s+(St|Ave|Blvd|Dr|Rd|Ln|Way|Ct|Pl)/i.test(l)) loc.address = l;
+      else if (/fax/i.test(l)) loc.fax = l.replace(/fax:?\s*/i,'');
+      else if (/\b(mon|tue|wed|thu|fri|sat|sun|am|pm|appointment)\b/i.test(l)) loc.hours = l;
+      else loc.notes = loc.notes ? loc.notes+'; '+l : l;
+    }
+    data.entries.push({ type:'location', id:++eid, data:loc });
+  }
+  for (const raw of lines) {
+    const l = raw.trim();
+    if (/^TITLE:\s*/i.test(l)) { data.title = l.replace(/^TITLE:\s*/i,''); continue; }
+    if (/^PHONE:\s*/i.test(l)) { data.phone = l.replace(/^PHONE:\s*/i,''); continue; }
+    if (/^SUBTITLE:\s*/i.test(l)) { data.subtitle = l.replace(/^SUBTITLE:\s*/i,''); continue; }
+    if (/^SUBTEXT:\s*/i.test(l)) { data.subtext = l.replace(/^SUBTEXT:\s*/i,''); continue; }
+    if (/^SMARTPHRASE:\s*/i.test(l)) { data.name = l.replace(/^SMARTPHRASE:\s*/i,''); continue; }
+    if (/^FOOTER:\s*/i.test(l)) { data.footer = l.replace(/^FOOTER:\s*/i,''); continue; }
+    if (/^TAGLINE:\s*/i.test(l)) { data.tagline = l.replace(/^TAGLINE:\s*/i,''); continue; }
+    if (/^---/.test(l)) { flush(); const t = l.replace(/^---\s*(SECTION:?\s*)?/i,'').trim(); data.entries.push({type:'section',id:++eid,data:{title:t}}); continue; }
+    if (!l) { flush(); continue; }
+    block.push(l);
+  }
+  flush();
+  return data;
+}
+function parseAndGenerate() {
+  const text = document.getElementById('paste-input').value;
+  if (!text.trim()) { showStatus('paste-status','Nothing to parse.','error'); return; }
+  const data = parsePaste(text);
+  if (!data.entries.length) { showStatus('paste-status','No locations found.','error'); return; }
+  lastBuildData = data; buildExcel(data);
+  showStatus('paste-status', data.entries.filter(e=>e.type==='location').length+' locations, '+data.entries.filter(e=>e.type==='section').length+' sections. Excel downloading.','success');
+}
+function parseAndPreview() {
+  const text = document.getElementById('paste-input').value;
+  if (!text.trim()) { showStatus('paste-status','Nothing to parse.','error'); return; }
+  lastBuildData = parsePaste(text);
+  renderPreviewFromData(lastBuildData); switchTab('preview'); hideStatus('paste-status');
+}
+function clearPaste() { document.getElementById('paste-input').value = ''; hideStatus('paste-status'); }
+function generateFromForm() {
+  const data = gatherFormData();
+  if (!data.title && !data.entries.filter(e=>e.type==='location'&&e.data.name).length) { showStatus('form-status','Add a title and at least one location.','error'); return; }
+  lastBuildData = data; buildExcel(data); hideStatus('form-status'); showToast('Excel file downloaded!');
+}
+function generateFromPreview() {
+  if (!lastBuildData) { showToast('No data — use Form or Paste first.'); return; }
+  buildExcel(lastBuildData); showToast('Excel file downloaded!');
+}
+// ===== PREVIEW =====
+function renderPreview() { lastBuildData = gatherFormData(); renderPreviewFromData(lastBuildData); }
+function renderPreviewFromData(data) {
+  const c = document.getElementById('preview-container');
+  const locs = data.entries.filter(e=>e.type==='location'&&e.data.name);
+  if (!locs.length && !data.title) { c.innerHTML = '<p style="color:var(--text-light);font-style:italic;">No content yet.</p>'; return; }
+  const cs = data.cols||2;
+  let h = '<table class="preview-table">';
+  if (data.title) h += '<tr><td class="hdr" colspan="'+cs+'">'+esc2(data.title)+'</td></tr>';
+  if (data.phone) h += '<tr><td class="ph" colspan="'+cs+'"><span>'+esc2(data.phone)+'</span></td></tr>';
+  if (data.subtitle) h += '<tr><td class="sub" colspan="'+cs+'">'+esc2(data.subtitle)+'</td></tr>';
+  if (data.subtext) h += '<tr><td class="stx" colspan="'+cs+'">'+esc2(data.subtext)+'</td></tr>';
+  let buf = [];
+  function flush() {
+    if (cs===2) { for(let i=0;i<buf.length;i+=2) h+='<tr><td>'+fmtLoc(buf[i])+'</td><td>'+(buf[i+1]?fmtLoc(buf[i+1]):'')+'</td></tr>'; }
+    else buf.forEach(l => { h+='<tr><td>'+fmtLoc(l)+'</td></tr>'; });
+    buf=[];
+  }
+  data.entries.forEach(e => {
+    if (e.type==='section') { flush(); h+='<tr><td class="sec" colspan="'+cs+'">'+esc2(e.data.title)+'</td></tr>'; }
+    else if (e.data.name) buf.push(e.data);
+  });
+  flush();
+  if (data.footer) h+='<tr><td class="ftr" colspan="'+cs+'">'+esc2(data.footer)+'</td></tr>';
+  if (data.tagline) h+='<tr><td class="tag" colspan="'+cs+'">'+esc2(data.tagline)+'</td></tr>';
+  h+='</table>';
+  c.innerHTML = h;
+}
+function fmtLoc(l) {
+  let h = '';
+  if (l.name) h += '<span class="ln">'+esc2(l.name)+'</span><br>';
+  if (l.address) h += esc2(l.address)+'<br>';
+  if (l.phone) h += '<span class="lp">'+esc2(l.phone)+'</span><br>';
+  if (l.fax) h += 'Fax: '+esc2(l.fax)+'<br>';
+  if (l.hours) h += esc2(l.hours)+'<br>';
+  if (l.notes) h += '<em>'+esc2(l.notes)+'</em>';
+  return h;
+}
+// ===== EXCEL BUILDER (ExcelJS) =====
+async function buildExcel(data) {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'ClinForge AVS Generator';
+  const ws = wb.addWorksheet('AVS');
+  const cols = data.cols || 2;
+  // Column widths
+  if (cols === 2) {
+    ws.getColumn(1).width = 48;
+    ws.getColumn(2).width = 48;
+  } else {
+    ws.getColumn(1).width = 96;
+  }
+  const BORDER = {
+    top: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+    bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+    left: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+    right: { style: 'thin', color: { argb: 'FFCCCCCC' } }
+  };
+  function addMerged(text, style) {
+    const r = ws.addRow(cols===2 ? [text,''] : [text]);
+    if (cols===2) ws.mergeCells(r.number, 1, r.number, 2);
+    const cell = r.getCell(1);
+    cell.border = BORDER;
+    cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
+    if (style==='title') {
+      cell.font = { name:'Arial', size:14, bold:true, color:{argb:'FFFFFFFF'} };
+      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF0E2640'} };
+      r.height = 36;
+    } else if (style==='phone') {
+      cell.font = { name:'Arial', size:12, bold:true, color:{argb:'FF0000FF'} };
+      r.height = 24;
+    } else if (style==='subtitle') {
+      cell.font = { name:'Arial', size:11, bold:true };
+      r.height = 22;
+    } else if (style==='subtext') {
+      cell.font = { name:'Arial', size:10, italic:true, color:{argb:'FF4A4A5A'} };
+      r.height = 20;
+    } else if (style==='section') {
+      cell.font = { name:'Arial', size:11, bold:true };
+      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFD9D9D9'} };
+      r.height = 28;
+    } else if (style==='footer') {
+      cell.font = { name:'Arial', size:9, color:{argb:'FF4A4A5A'} };
+      r.height = 20;
+    } else if (style==='tagline') {
+      cell.font = { name:'Arial', size:10, bold:true, italic:true };
+      r.height = 24;
+    }
+    return r;
+  }
+  function locRichText(loc) {
+    const parts = [];
+    if (loc.name) parts.push({ font:{name:'Arial',size:10,bold:true}, text:loc.name+'\n' });
+    if (loc.address) parts.push({ font:{name:'Arial',size:10}, text:loc.address+'\n' });
+    if (loc.phone) parts.push({ font:{name:'Arial',size:10,bold:true,color:{argb:'FF0000FF'}}, text:loc.phone+'\n' });
+    if (loc.fax) parts.push({ font:{name:'Arial',size:10}, text:'Fax: '+loc.fax+'\n' });
+    if (loc.hours) parts.push({ font:{name:'Arial',size:10}, text:loc.hours+'\n' });
+    if (loc.notes) parts.push({ font:{name:'Arial',size:10,italic:true}, text:loc.notes });
+    if (parts.length) { const last=parts[parts.length-1]; last.text=last.text.replace(/\n$/,''); }
+    return parts;
+  }
+  function addLocRow(a, b) {
+    const r = ws.addRow(cols===2 ? ['',''] : ['']);
+    r.height = 85;
+    const cA = r.getCell(1);
+    if (a && a.name) cA.value = { richText: locRichText(a) };
+    cA.alignment = { wrapText:true, vertical:'top' };
+    cA.border = BORDER;
+    if (cols === 2) {
+      const cB = r.getCell(2);
+      if (b && b.name) cB.value = { richText: locRichText(b) };
+      cB.alignment = { wrapText:true, vertical:'top' };
+      cB.border = BORDER;
+    }
+  }
+  // ===== BUILD =====
+  if (data.title) addMerged(data.title, 'title');
+  if (data.phone) addMerged(data.phone, 'phone');
+  if (data.subtitle) addMerged(data.subtitle, 'subtitle');
+  if (data.subtext) addMerged(data.subtext, 'subtext');
+  if (data.title||data.phone||data.subtitle||data.subtext) {
+    const sp = ws.addRow(cols===2?['','']:['']);
+    sp.height = 6;
+  }
+  let buf = [];
+  function flush() {
+    if (cols===2) { for(let i=0;i<buf.length;i+=2) addLocRow(buf[i], buf[i+1]||null); }
+    else buf.forEach(l => addLocRow(l, null));
+    buf = [];
+  }
+  data.entries.forEach(e => {
+    if (e.type==='section') { flush(); addMerged(e.data.title||'', 'section'); }
+    else if (e.data.name) buf.push(e.data);
+  });
+  flush();
+  if (data.footer) addMerged(data.footer, 'footer');
+  if (data.tagline) addMerged(data.tagline, 'tagline');
+  // ===== DOWNLOAD =====
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (data.name||'.wwavsoutput').replace(/^\./,'') + '.xlsx';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
