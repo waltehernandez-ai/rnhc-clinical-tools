@@ -3,193 +3,152 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cystatin C Ordering Decision Tool | RNHC</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="robots" content="noindex, nofollow">
+<title>Cystatin C Ordering Decision Tool — ClinForge</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 <style>
-:root{--navy:#163B5C;--navy-deep:#0E2640;--teal:#0B7A7D;--teal-light:#E0F7F6;--green:#1B7A3D;--green-light:#E3F4E8;--orange:#C65100;--orange-light:#FFF0E0;--red:#A12B2B;--red-light:#FDEAEA;--purple:#5B2C8A;--purple-light:#F0E6F9;--amber:#B8860B;--amber-light:#FFF8E1;--bg:#F8F9FB;--surface:#FFFFFF;--text:#1A1A2E;--text-mid:#4A4A5A;--text-light:#7A7A8A;--border:#E2E4EA;--radius:12px;--radius-sm:8px;--shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);--shadow-lg:0 4px 16px rgba(0,0,0,.08),0 12px 40px rgba(0,0,0,.06);--transition:.25s cubic-bezier(.4,0,.2,1)}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
-
-/* Header */
-.header{background:linear-gradient(135deg,var(--navy-deep) 0%,var(--navy) 60%,var(--teal) 100%);padding:2rem 1.5rem 1.8rem;color:#fff;position:relative;overflow:hidden}
-.header::before{content:'';position:absolute;top:-40%;right:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(11,122,125,.2) 0%,transparent 70%);border-radius:50%}
-.header-inner{max-width:700px;margin:0 auto;position:relative;z-index:1}
-.header h1{font-size:1.6rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.3rem}
-.header .meta{font-size:.8rem;opacity:.7}
-.header .meta span{margin:0 .4rem}
-
-/* Nav tabs */
-.nav-bar{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.nav-inner{max-width:700px;margin:0 auto;display:flex;padding:0 1.5rem}
-.nav-tab{padding:.75rem 1rem;font-family:inherit;font-size:.85rem;font-weight:600;border:none;background:none;cursor:pointer;color:var(--text-light);border-bottom:3px solid transparent;transition:all var(--transition)}
-.nav-tab:hover{color:var(--navy)}
-.nav-tab.active{color:var(--navy);border-bottom-color:var(--teal)}
-
-/* Container */
-.container{max-width:700px;margin:0 auto;padding:1.5rem}
-
-/* Panels */
+/* === Cystatin C page-specific styles === */
 .panel{display:none}
 .panel.active{display:block}
 
 /* Steps */
-.step{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:1rem;overflow:hidden;border:1px solid var(--border);transition:box-shadow var(--transition)}
-.step.active{box-shadow:var(--shadow-lg);border-color:var(--teal)}
-.step.completed{opacity:.6}
+.step{background:var(--c-surface);border-radius:var(--r-md);box-shadow:var(--shadow-sm);margin-bottom:var(--s-4);overflow:hidden;border:1px solid var(--c-border);transition:box-shadow var(--duration-normal)}
+.step.active{box-shadow:var(--shadow-md);border-color:var(--c-border-strong)}
+.step.completed{opacity:.55}
 .step.completed .step-body{display:none}
 .step.hidden{display:none}
-.step-header{padding:1rem 1.25rem;display:flex;align-items:center;gap:.75rem;cursor:pointer;user-select:none}
-.step-number{width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;transition:background var(--transition)}
-.step.completed .step-number{background:var(--green)}
+.step-header{padding:var(--s-4) var(--s-5);display:flex;align-items:center;gap:var(--s-3);cursor:pointer;user-select:none}
+.step-number{width:32px;height:32px;border-radius:50%;background:var(--c-navy);color:var(--c-text-inverse);display:flex;align-items:center;justify-content:center;font-size:.875rem;font-weight:700;flex-shrink:0;transition:background var(--duration-normal)}
+.step.completed .step-number{background:var(--c-success)}
 .step.completed .step-number::after{content:'✓'}
 .step.completed .step-number span{display:none}
-.step-title{font-size:1rem;font-weight:600;color:var(--navy);flex:1}
-.step.completed .step-title{color:var(--text-light)}
-.step-edit{font-size:.8rem;color:var(--teal);font-weight:500;cursor:pointer;display:none;padding:.25rem .5rem;border-radius:var(--radius-sm);transition:background var(--transition)}
-.step-edit:hover{background:var(--teal-light)}
+.step-title{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:var(--c-navy);flex:1;letter-spacing:-0.01em}
+.step.completed .step-title{color:var(--c-text-tertiary)}
+.step-edit{font-size:.8125rem;color:var(--c-accent);font-weight:600;cursor:pointer;display:none;padding:var(--s-1) var(--s-2);border-radius:var(--r-sm);transition:background var(--duration-fast)}
+.step-edit:hover{background:var(--c-accent-subtle)}
 .step.completed .step-edit{display:block}
-.step-body{padding:0 1.25rem 1.25rem}
-.step-desc{font-size:.88rem;color:var(--text-mid);margin-bottom:1rem;line-height:1.55}
+.step-body{padding:0 var(--s-5) var(--s-5)}
+.step-desc{font-size:.875rem;color:var(--c-text-secondary);margin-bottom:var(--s-4);line-height:1.6}
 
 /* Options */
-.option-group{display:flex;flex-direction:column;gap:.5rem}
-.option{display:flex;align-items:flex-start;gap:.75rem;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition)}
-.option:hover{border-color:var(--teal);background:var(--teal-light)}
-.option.selected{border-color:var(--teal);background:var(--teal-light)}
-.option.contra:hover{border-color:var(--red);background:var(--red-light)}
-.option.contra.selected{border-color:var(--red);background:var(--red-light)}
+.option-group{display:flex;flex-direction:column;gap:var(--s-2)}
+.option{display:flex;align-items:flex-start;gap:var(--s-3);padding:var(--s-3) var(--s-4);border:1.5px solid var(--c-border-strong);border-radius:var(--r-sm);cursor:pointer;transition:all var(--duration-fast)}
+.option:hover{border-color:var(--c-accent);background:var(--c-accent-subtle)}
+.option.selected{border-color:var(--c-accent);background:var(--c-accent-muted)}
+.option.contra:hover{border-color:var(--c-danger);background:var(--c-danger-light)}
+.option.contra.selected{border-color:var(--c-danger);background:var(--c-danger-light)}
 .option input[type="checkbox"]{display:none}
-.check-box{width:20px;height:20px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all var(--transition);font-size:.7rem;color:#fff}
-.option.selected .check-box{background:var(--teal);border-color:var(--teal)}
-.option.contra.selected .check-box{background:var(--red);border-color:var(--red)}
+.check-box{width:20px;height:20px;border:2px solid var(--c-border-strong);border-radius:4px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all var(--duration-fast);font-size:.7rem;color:#fff}
+.option.selected .check-box{background:var(--c-accent);border-color:var(--c-accent)}
+.option.contra.selected .check-box{background:var(--c-danger);border-color:var(--c-danger)}
 .option.selected .check-box::after{content:'✓'}
-.option-label{font-size:.9rem;font-weight:500;color:var(--text);line-height:1.4}
-.option-detail{font-size:.78rem;color:var(--text-light);margin-top:.15rem;line-height:1.4}
+.option-label{font-size:.9375rem;font-weight:500;color:var(--c-text);line-height:1.4}
+.option-detail{font-size:.8125rem;color:var(--c-text-tertiary);margin-top:2px;line-height:1.4}
 
 /* Buttons */
-.btn-row{margin-top:1.25rem;display:flex;gap:.75rem;flex-wrap:wrap}
-.btn{padding:.6rem 1.5rem;border-radius:var(--radius-sm);font-family:inherit;font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:all var(--transition)}
-.btn-primary{background:var(--navy);color:#fff}
-.btn-primary:hover{background:var(--navy-deep);transform:translateY(-1px)}
-.btn-primary:disabled{background:var(--border);color:var(--text-light);cursor:not-allowed;transform:none}
-.btn-secondary{background:transparent;color:var(--text-mid);border:1.5px solid var(--border)}
-.btn-secondary:hover{border-color:var(--text-mid)}
+.btn-row{margin-top:var(--s-5);display:flex;gap:var(--s-3);flex-wrap:wrap}
 
 /* Result */
-.result{border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;border-left:5px solid;box-shadow:var(--shadow-lg);animation:slideUp .4s ease}
-@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.result-order{background:var(--green-light);border-color:var(--green)}
-.result-stop{background:var(--surface);border-color:var(--border)}
-.result-caution{background:var(--amber-light);border-color:var(--amber)}
-.result h3{font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
-.result-order h3{color:var(--green)}
-.result-stop h3{color:var(--text-mid)}
-.result-caution h3{color:var(--amber)}
-.result p{font-size:.88rem;color:var(--text-mid);line-height:1.6}
+.result{border-radius:var(--r-md);padding:var(--s-5);margin-bottom:var(--s-4);border-left:5px solid;box-shadow:var(--shadow-sm);animation:fadeSlideUp .4s ease}
+.result-order{background:var(--c-success-light);border-color:var(--c-success)}
+.result-stop{background:var(--c-surface);border-color:var(--c-border-strong)}
+.result-caution{background:var(--c-warning-light);border-color:var(--c-warning)}
+.result h3{font-family:var(--font-heading);font-size:1.0625rem;font-weight:700;margin-bottom:var(--s-2);letter-spacing:-0.01em}
+.result-order h3{color:#166534}
+.result-stop h3{color:var(--c-text-secondary)}
+.result-caution h3{color:#92400E}
+.result p{font-size:.875rem;color:var(--c-text-secondary);line-height:1.6}
+.reset-row{text-align:center;margin:var(--s-5) 0}
 
-/* Ref sections */
-.ref-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.75rem;overflow:hidden;transition:box-shadow var(--transition)}
-.ref-section:hover{box-shadow:var(--shadow)}
-.ref-toggle{width:100%;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;font-family:inherit}
-.ref-toggle-left{display:flex;align-items:center;gap:.6rem}
-.ref-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
-.ref-toggle-title{font-size:.92rem;font-weight:600;color:var(--navy)}
-.ref-chevron{font-size:.75rem;color:var(--text-light);transition:transform var(--transition)}
-.ref-section.open .ref-chevron{transform:rotate(180deg)}
-.ref-content{display:none;padding:0 1.25rem 1.25rem}
-.ref-section.open .ref-content{display:block}
+/* Calculator */
+.calc-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md);box-shadow:var(--shadow-sm);overflow:hidden}
+.calc-header{background:var(--c-navy);padding:var(--s-5) var(--s-6);color:var(--c-text-inverse)}
+.calc-header h2{font-family:var(--font-heading);font-size:1.125rem;font-weight:700;margin-bottom:var(--s-1);letter-spacing:-0.02em}
+.calc-header p{font-size:.8125rem;opacity:.7}
+.calc-body{padding:var(--s-6)}
+.calc-row{display:flex;gap:var(--s-4);margin-bottom:var(--s-4);flex-wrap:wrap}
+.calc-field{flex:1;min-width:140px}
+.calc-field label{display:block;font-size:.8125rem;font-weight:600;color:var(--c-text-secondary);margin-bottom:var(--s-1);text-transform:uppercase;letter-spacing:.03em}
+.calc-field input,.calc-field select{width:100%;padding:var(--s-3) var(--s-4);border:1px solid var(--c-border-strong);border-radius:var(--r-sm);font-family:var(--font-body);font-size:.9375rem;color:var(--c-text);background:var(--c-surface-alt);transition:border-color var(--duration-fast)}
+.calc-field input:focus,.calc-field select:focus{outline:none;border-color:var(--c-accent);background:var(--c-surface);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+.calc-field input::placeholder{color:var(--c-text-tertiary)}
+.calc-btn-row{display:flex;gap:var(--s-3);margin-top:var(--s-5);flex-wrap:wrap}
+.calc-results{margin-top:var(--s-5);display:none}
+.calc-results.show{display:block}
+.egfr-result{display:flex;align-items:center;justify-content:space-between;padding:var(--s-3) var(--s-4);border-radius:var(--r-sm);margin-bottom:var(--s-2);border-left:4px solid}
+.egfr-result .label{font-size:.875rem;font-weight:500;color:var(--c-text-secondary)}
+.egfr-result .value{font-family:var(--font-mono);font-size:1.25rem;font-weight:600}
+.egfr-result .unit{font-size:.75rem;color:var(--c-text-tertiary);margin-left:var(--s-1);font-family:var(--font-body)}
+.egfr-cr{border-color:var(--c-navy);background:var(--c-surface-alt)}
+.egfr-cr .value{color:var(--c-navy)}
+.egfr-crcys{border-color:var(--c-accent);background:var(--c-info-light)}
+.egfr-crcys .value{color:var(--c-accent)}
+.egfr-cys{border-color:var(--c-purple);background:var(--c-purple-light)}
+.egfr-cys .value{color:var(--c-purple)}
+.calc-stage{margin-top:var(--s-3);padding:var(--s-3) var(--s-4);border-radius:var(--r-sm);font-size:.875rem;line-height:1.5}
+.stage-ok{background:var(--c-success-light);color:#166534}
+.stage-mild{background:var(--c-warning-light);color:#92400E}
+.stage-mod{background:var(--c-warning-light);color:var(--c-warning)}
+.stage-severe{background:var(--c-danger-light);color:#991B1B}
+.calc-note{margin-top:var(--s-3);font-size:.8125rem;color:var(--c-text-tertiary);line-height:1.5}
+.nkf-link{display:inline-flex;align-items:center;gap:var(--s-2);margin-top:var(--s-4);padding:var(--s-2) var(--s-3);background:var(--c-accent-subtle);border:1px solid var(--c-accent);border-radius:var(--r-sm);color:var(--c-accent);font-size:.8125rem;font-weight:600;text-decoration:none;transition:all var(--duration-fast)}
+.nkf-link:hover{background:var(--c-accent);color:var(--c-text-inverse)}
 
-/* Tables */
-.conf-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:.5rem}
-.conf-table th{background:var(--navy);color:#fff;padding:.5rem .6rem;text-align:left;font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.03em}
-.conf-table td{padding:.5rem .6rem;border-bottom:1px solid var(--border);color:var(--text-mid);line-height:1.4}
-.conf-table tr:nth-child(even) td{background:var(--bg)}
-.conf-table .factor{font-weight:600;color:var(--text)}
-.conf-table .up{color:var(--red);font-weight:600}
-.conf-table .down{color:var(--teal);font-weight:600}
+/* Reference tables */
+.conf-table{width:100%;border-collapse:collapse;font-size:.8125rem;margin-top:var(--s-2)}
+.conf-table th{background:var(--c-navy);color:var(--c-text-inverse);padding:var(--s-2) var(--s-3);text-align:left;font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.03em}
+.conf-table td{padding:var(--s-2) var(--s-3);border-bottom:1px solid var(--c-border);color:var(--c-text-secondary);line-height:1.4}
+.conf-table tr:nth-child(even) td{background:var(--c-surface-alt)}
+.conf-table .factor{font-weight:600;color:var(--c-text)}
+.conf-table .up{color:var(--c-danger);font-weight:600}
+.conf-table .down{color:var(--c-accent);font-weight:600}
 
 /* Med items */
-.med-item{padding:.6rem 0;border-bottom:1px solid var(--border)}
+.med-item{padding:var(--s-3) 0;border-bottom:1px solid var(--c-border)}
 .med-item:last-child{border-bottom:none}
-.med-name{font-weight:600;color:var(--navy);font-size:.88rem}
-.med-detail{font-size:.82rem;color:var(--text-mid);margin-top:.1rem;line-height:1.4}
+.med-name{font-weight:600;color:var(--c-navy);font-size:.875rem}
+.med-detail{font-size:.8125rem;color:var(--c-text-secondary);margin-top:2px;line-height:1.4}
 
-/* Calculator panel */
-.calc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-.calc-header{background:linear-gradient(135deg,var(--navy-deep),var(--teal));padding:1.25rem 1.5rem;color:#fff}
-.calc-header h2{font-size:1.15rem;font-weight:700;margin-bottom:.2rem}
-.calc-header p{font-size:.8rem;opacity:.8}
-.calc-body{padding:1.5rem}
-.calc-row{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
-.calc-field{flex:1;min-width:140px}
-.calc-field label{display:block;font-size:.8rem;font-weight:600;color:var(--text-mid);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.03em}
-.calc-field input,.calc-field select{width:100%;padding:.6rem .8rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.92rem;color:var(--text);background:var(--bg);transition:border-color var(--transition)}
-.calc-field input:focus,.calc-field select:focus{outline:none;border-color:var(--teal);background:var(--surface)}
-.calc-field input::placeholder{color:var(--text-light)}
-.calc-btn-row{display:flex;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap}
-.calc-results{margin-top:1.25rem;display:none}
-.calc-results.show{display:block}
-.egfr-result{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-radius:var(--radius-sm);margin-bottom:.5rem;border-left:4px solid}
-.egfr-result .label{font-size:.85rem;font-weight:500;color:var(--text-mid)}
-.egfr-result .value{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:600}
-.egfr-result .unit{font-size:.75rem;color:var(--text-light);margin-left:.25rem;font-family:'DM Sans',sans-serif}
-.egfr-cr{border-color:var(--navy);background:var(--bg)}
-.egfr-cr .value{color:var(--navy)}
-.egfr-crcys{border-color:var(--teal);background:var(--teal-light)}
-.egfr-crcys .value{color:var(--teal)}
-.egfr-cys{border-color:var(--purple);background:var(--purple-light)}
-.egfr-cys .value{color:var(--purple)}
-.calc-stage{margin-top:.75rem;padding:.75rem 1rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5}
-.stage-ok{background:var(--green-light);color:var(--green)}
-.stage-mild{background:#FFF9C4;color:#F57F17}
-.stage-mod{background:var(--orange-light);color:var(--orange)}
-.stage-severe{background:var(--red-light);color:var(--red)}
-.calc-note{margin-top:.75rem;font-size:.78rem;color:var(--text-light);line-height:1.5}
-.nkf-link{display:inline-flex;align-items:center;gap:.4rem;margin-top:1rem;padding:.5rem .9rem;background:var(--teal-light);border:1.5px solid var(--teal);border-radius:var(--radius-sm);color:var(--teal);font-size:.82rem;font-weight:600;text-decoration:none;transition:all var(--transition)}
-.nkf-link:hover{background:var(--teal);color:#fff}
+/* Refs */
+.refs-label{font-size:.8125rem;font-weight:600;color:var(--c-text-tertiary);margin-top:var(--s-6);margin-bottom:var(--s-1);text-transform:uppercase;letter-spacing:.04em}
+.refs-list{font-size:.75rem;color:var(--c-text-tertiary);line-height:1.7}
 
-/* Reset */
-.reset-row{text-align:center;margin:1.5rem 0}
-
-/* Footer */
-.footer{max-width:700px;margin:0 auto;padding:1rem 1.5rem 2rem;text-align:center;font-size:.75rem;color:var(--text-light);line-height:1.5}
-.refs-label{font-size:.78rem;font-weight:600;color:var(--text-light);margin-top:1.5rem;margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.04em}
-.refs-list{font-size:.72rem;color:var(--text-light);line-height:1.6}
-
-@media(max-width:500px){
-  .header h1{font-size:1.3rem}
-  .container{padding:1rem}
-  .conf-table{font-size:.75rem}
-  .conf-table th,.conf-table td{padding:.4rem}
+@media(max-width:640px){
   .calc-row{flex-direction:column}
-  .nav-tab{padding:.65rem .6rem;font-size:.8rem}
+  .conf-table{font-size:.75rem}
+  .conf-table th,.conf-table td{padding:var(--s-1) var(--s-2)}
+  .tab-btn{padding:var(--s-3) var(--s-2);font-size:.8125rem}
 }
 </style>
 </head>
 <body>
 
 <!-- Header -->
-<div class="header">
-  <div class="header-inner">
+<div class="container" style="padding-top:var(--s-4)">
+  <div class="tool-header">
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      ClinForge Tools
+    </a>
     <h1>Cystatin C Clinical Decision Tool</h1>
-    <div class="meta">v2.3 <span>•</span> March 2026 <span>•</span> RNHC Primary Care</div>
+    <div class="tool-meta">v2.3 <span>·</span> March 2026 <span>·</span> RNHC Primary Care</div>
   </div>
 </div>
 
 <!-- Nav tabs -->
-<div class="nav-bar">
-  <div class="nav-inner">
-    <button class="nav-tab active" onclick="switchPanel('decision')">📋 Ordering Decision</button>
-    <button class="nav-tab" onclick="switchPanel('calculator')">🧮 eGFR Calculator</button>
-    <button class="nav-tab" onclick="switchPanel('reference')">📖 Reference</button>
-  </div>
+<div class="tab-bar" style="max-width:680px;margin:0 auto">
+  <button class="tab-btn active" onclick="switchPanel('decision')">Ordering Decision</button>
+  <button class="tab-btn" onclick="switchPanel('calculator')">eGFR Calculator</button>
+  <button class="tab-btn" onclick="switchPanel('reference')">Reference</button>
 </div>
 
-<div class="container">
+<div class="container" style="padding-top:var(--s-6);padding-bottom:var(--s-12)">
 
-<!-- ════════════════════════════════════════ -->
-<!-- PANEL 1: DECISION WALKTHROUGH           -->
-<!-- ════════════════════════════════════════ -->
+<!-- PANEL 1: DECISION WALKTHROUGH -->
 <div class="panel active" id="panel-decision">
 
   <!-- Step 1 -->
@@ -216,7 +175,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
       </div>
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-step1" onclick="completeStep1()" disabled>Continue</button>
-        <button class="btn btn-secondary" onclick="noIndications()">None of these apply</button>
+        <button class="btn btn-ghost" onclick="noIndications()">None of these apply</button>
       </div>
     </div>
   </div>
@@ -239,26 +198,24 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
       </div>
       <div class="btn-row">
         <button class="btn btn-primary" onclick="completeStep2(true)">None — proceed with order</button>
-        <button class="btn btn-secondary" id="btn-step2-contra" onclick="completeStep2(false)" style="display:none">Continue with contraindications</button>
+        <button class="btn btn-ghost" id="btn-step2-contra" onclick="completeStep2(false)" style="display:none">Continue with contraindications</button>
       </div>
     </div>
   </div>
 
   <div id="result-area"></div>
 
-  <div id="ref-sections-inline" style="display:none;margin-top:1.5rem">
-    <div style="font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-light);font-weight:600;margin-bottom:.5rem">Quick Actions</div>
+  <div id="ref-sections-inline" style="display:none;margin-top:var(--s-6)">
+    <div style="font-size:.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--c-text-tertiary);font-weight:600;margin-bottom:var(--s-2)">Quick Actions</div>
     <div class="btn-row" style="margin-top:0">
-      <button class="btn btn-primary" onclick="switchPanel('calculator')" style="background:var(--teal)">🧮 Open eGFR Calculator</button>
-      <a class="nkf-link" href="https://www.kidney.org/professionals/gfr_calculator" target="_blank" rel="noopener">🔗 NKF Calculator (backup)</a>
+      <button class="btn btn-accent" onclick="switchPanel('calculator')">Open eGFR Calculator</button>
+      <a class="nkf-link" href="https://www.kidney.org/professionals/gfr_calculator" target="_blank" rel="noopener">NKF Calculator (backup)</a>
     </div>
   </div>
 
 </div>
 
-<!-- ════════════════════════════════════════ -->
-<!-- PANEL 2: eGFR CALCULATOR                -->
-<!-- ════════════════════════════════════════ -->
+<!-- PANEL 2: eGFR CALCULATOR -->
 <div class="panel" id="panel-calculator">
 
   <div class="calc-card">
@@ -299,38 +256,36 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
         </div>
       </div>
 
-      <div style="margin-top:.5rem">
-        <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--text-mid);cursor:pointer">
-          <input type="checkbox" id="calc-bsa-toggle" onchange="toggleBSA()">
+      <div style="margin-top:var(--s-2)">
+        <label style="display:flex;align-items:center;gap:var(--s-2);font-size:.8125rem;color:var(--c-text-secondary);cursor:pointer;text-transform:none;letter-spacing:0">
+          <input type="checkbox" id="calc-bsa-toggle" onchange="toggleBSA()" style="accent-color:var(--c-accent)">
           <span>Adjust for BSA (for medication dosing — DuBois method)</span>
         </label>
       </div>
 
       <div class="calc-btn-row">
         <button class="btn btn-primary" onclick="calculateEGFR()">Calculate</button>
-        <button class="btn btn-secondary" onclick="clearCalc()">Clear</button>
+        <button class="btn btn-ghost" onclick="clearCalc()">Clear</button>
       </div>
 
       <div class="calc-results" id="calc-results"></div>
 
       <div class="calc-note">
         Equations: CKD-EPI 2021 (Inker et al., NEJM 2021). Standardized assays assumed.<br>
-        <a class="nkf-link" href="https://www.kidney.org/professionals/gfr_calculator" target="_blank" rel="noopener" style="margin-top:.75rem">🔗 NKF eGFR Calculator — verify results</a>
+        <a class="nkf-link" href="https://www.kidney.org/professionals/gfr_calculator" target="_blank" rel="noopener" style="margin-top:var(--s-3)">NKF eGFR Calculator — verify results</a>
       </div>
     </div>
   </div>
 
 </div>
 
-<!-- ════════════════════════════════════════ -->
-<!-- PANEL 3: REFERENCE                      -->
-<!-- ════════════════════════════════════════ -->
+<!-- PANEL 3: REFERENCE -->
 <div class="panel" id="panel-reference">
 
   <!-- Confounders -->
   <div class="ref-section open">
     <button class="ref-toggle" onclick="toggleRef(this)">
-      <div class="ref-toggle-left"><div class="ref-icon" style="background:var(--purple-light);color:var(--purple)">⚗</div><div class="ref-toggle-title">Non-GFR Confounders Table</div></div>
+      <div class="ref-toggle-left"><div class="ref-icon" style="background:var(--c-purple-light);color:var(--c-purple)">⚗</div><div class="ref-toggle-title">Non-GFR Confounders Table</div></div>
       <div class="ref-chevron">▼</div>
     </button>
     <div class="ref-content">
@@ -353,32 +308,32 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
   <!-- Med dosing -->
   <div class="ref-section">
     <button class="ref-toggle" onclick="toggleRef(this)">
-      <div class="ref-toggle-left"><div class="ref-icon" style="background:var(--amber-light);color:var(--amber)">💊</div><div class="ref-toggle-title">Medication Dosing with eGFRcr-cys</div></div>
+      <div class="ref-toggle-left"><div class="ref-icon" style="background:var(--c-warning-light);color:var(--c-warning)">💊</div><div class="ref-toggle-title">Medication Dosing with eGFRcr-cys</div></div>
       <div class="ref-chevron">▼</div>
     </button>
     <div class="ref-content">
-      <div style="font-size:.82rem;color:var(--text-mid);margin-bottom:.75rem">Use eGFRcr-cys when GFR accuracy is critical for dosing:</div>
+      <div style="font-size:.8125rem;color:var(--c-text-secondary);margin-bottom:var(--s-3)">Use eGFRcr-cys when GFR accuracy is critical for dosing:</div>
       <div class="med-item"><div class="med-name">DOACs</div><div class="med-detail">Apixaban, rivaroxaban, dabigatran, edoxaban — underdose → thrombosis; overdose → bleeding</div></div>
       <div class="med-item"><div class="med-name">Metformin</div><div class="med-detail">Borderline eGFRcr 30–45: confirm with eGFRcr-cys before discontinuing or continuing</div></div>
       <div class="med-item"><div class="med-name">Vancomycin</div><div class="med-detail">Elimination better predicted by CysC equations, especially elderly or low muscle mass</div></div>
       <div class="med-item"><div class="med-name">Digoxin</div><div class="med-detail">Narrow TI, renally cleared — use eGFRcr-cys when Cr unreliable</div></div>
       <div class="med-item"><div class="med-name">Gabapentin / Pregabalin</div><div class="med-detail">Renally cleared — use eGFRcr-cys in borderline ranges</div></div>
       <div class="med-item"><div class="med-name">Nephrotoxic agents</div><div class="med-detail">Aminoglycosides, cisplatin, high-dose MTX — accurate GFR critical</div></div>
-      <div style="margin-top:.75rem;padding:.6rem .8rem;background:var(--amber-light);border-radius:var(--radius-sm);font-size:.82rem;color:var(--amber)"><strong>⚠ BSA adjustment:</strong> At extremes of body size, de-index eGFR = eGFR × (patient BSA ÷ 1.73). Use the calculator's BSA option.</div>
+      <div class="alert alert-warn" style="margin-top:var(--s-3)"><strong>BSA adjustment:</strong> At extremes of body size, de-index eGFR = eGFR × (patient BSA ÷ 1.73). Use the calculator's BSA option.</div>
     </div>
   </div>
 
   <!-- Interpretation -->
   <div class="ref-section">
     <button class="ref-toggle" onclick="toggleRef(this)">
-      <div class="ref-toggle-left"><div class="ref-icon" style="background:var(--teal-light);color:var(--teal)">📊</div><div class="ref-toggle-title">Interpreting Results & Discordance</div></div>
+      <div class="ref-toggle-left"><div class="ref-icon" style="background:var(--c-info-light);color:var(--c-accent)">📊</div><div class="ref-toggle-title">Interpreting Results & Discordance</div></div>
       <div class="ref-chevron">▼</div>
     </button>
     <div class="ref-content">
-      <div style="font-size:.85rem;color:var(--text-mid);line-height:1.6">
-        <p style="margin-bottom:.6rem"><strong style="color:var(--navy)">Always use eGFRcr-cys</strong> (CKD-EPI 2021 combined equation) — most accurate for most patients.</p>
-        <p style="margin-bottom:.6rem"><strong style="color:var(--green)">eGFRcr 45–59 pathway:</strong> If eGFRcr-cys or eGFRcys &gt;60 → may NOT have CKD, reclassify. If ≤60 → CKD confirmed, stage with eGFRcr-cys.</p>
-        <p style="margin-bottom:.6rem"><strong style="color:var(--purple)">Discordance (&gt;15–20%):</strong> Use combined equation — never rely on single marker. Investigate confounders. eGFRcys &lt;&lt; eGFRcr = independent CV risk factor.</p>
+      <div style="font-size:.875rem;color:var(--c-text-secondary);line-height:1.6">
+        <p style="margin-bottom:var(--s-3)"><strong style="color:var(--c-navy)">Always use eGFRcr-cys</strong> (CKD-EPI 2021 combined equation) — most accurate for most patients.</p>
+        <p style="margin-bottom:var(--s-3)"><strong style="color:var(--c-success)">eGFRcr 45–59 pathway:</strong> If eGFRcr-cys or eGFRcys &gt;60 → may NOT have CKD, reclassify. If ≤60 → CKD confirmed, stage with eGFRcr-cys.</p>
+        <p style="margin-bottom:var(--s-3)"><strong style="color:var(--c-purple)">Discordance (&gt;15–20%):</strong> Use combined equation — never rely on single marker. Investigate confounders. eGFRcys &lt;&lt; eGFRcr = independent CV risk factor.</p>
         <p>If combined equation still discordant with clinical picture → consider measured GFR (iohexol clearance) or timed urine CrCl.</p>
       </div>
     </div>
@@ -387,21 +342,21 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
   <!-- Monitoring -->
   <div class="ref-section">
     <button class="ref-toggle" onclick="toggleRef(this)">
-      <div class="ref-toggle-left"><div class="ref-icon" style="background:var(--navy);color:#fff">📋</div><div class="ref-toggle-title">Monitoring & Referral</div></div>
+      <div class="ref-toggle-left"><div class="ref-icon" style="background:var(--c-navy);color:var(--c-text-inverse)">📋</div><div class="ref-toggle-title">Monitoring & Referral</div></div>
       <div class="ref-chevron">▼</div>
     </button>
     <div class="ref-content">
-      <div style="font-size:.85rem;color:var(--text-mid);line-height:1.7">
-        <p style="margin-bottom:.4rem">• eGFRcr-cys ≥60 + no albuminuria → CKD unlikely. Routine monitoring not required.</p>
-        <p style="margin-bottom:.4rem">• eGFRcr-cys &lt;60 → Stage per KDIGO. G3a/A1 = annual monitoring.</p>
-        <p style="margin-bottom:.4rem">• CKD G3+: annual Hgb. CKD G3a–5: periodic Ca, PO₄, vitamin D, PTH.</p>
-        <p><strong style="color:var(--red)">Refer to Nephrology:</strong> eGFR &lt;30, UACR &gt;300, rapid decline (&gt;5 mL/min/yr), unexplained hematuria, refractory HTN, suspected glomerular disease.</p>
+      <div style="font-size:.875rem;color:var(--c-text-secondary);line-height:1.7">
+        <p style="margin-bottom:var(--s-1)">• eGFRcr-cys ≥60 + no albuminuria → CKD unlikely. Routine monitoring not required.</p>
+        <p style="margin-bottom:var(--s-1)">• eGFRcr-cys &lt;60 → Stage per KDIGO. G3a/A1 = annual monitoring.</p>
+        <p style="margin-bottom:var(--s-1)">• CKD G3+: annual Hgb. CKD G3a–5: periodic Ca, PO₄, vitamin D, PTH.</p>
+        <p><strong style="color:var(--c-danger)">Refer to Nephrology:</strong> eGFR &lt;30, UACR &gt;300, rapid decline (&gt;5 mL/min/yr), unexplained hematuria, refractory HTN, suspected glomerular disease.</p>
       </div>
     </div>
   </div>
 
   <!-- References -->
-  <div class="refs-label" style="margin-top:1.5rem">Key References</div>
+  <div class="refs-label" style="margin-top:var(--s-6)">Key References</div>
   <div class="refs-list">
     [1] KDIGO 2024 CKD Guideline. Kidney Int. 2024;105(4S):S117–S314.<br>
     [2] NKF-KDOQI US Commentary. Navaneethan et al. AJKD. 2025;85(2):135–176.<br>
@@ -416,10 +371,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 
 </div>
 
-<div class="footer">
-  Clinical decision support only. Does not replace clinical judgment.<br>
-  KDIGO 2024 · NKF-KDOQI 2025 · VA/DoD 2025
-</div>
+<footer class="site-footer">
+  <div class="container">
+    <p class="disclaimer">Clinical decision support only. Does not replace clinical judgment.<br>KDIGO 2024 · NKF-KDOQI 2025 · VA/DoD 2025</p>
+    <p class="footer-author">Walter Hernandez, MSN, MPH, FNP-C</p>
+  </div>
+</footer>
 
 <script>
 // ═══════════════════════════════════════
@@ -427,9 +384,9 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 // ═══════════════════════════════════════
 function switchPanel(name) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
-  const tabs = document.querySelectorAll('.nav-tab');
+  const tabs = document.querySelectorAll('.tab-btn');
   const map = {decision:0, calculator:1, reference:2};
   tabs[map[name]].classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
@@ -505,7 +462,7 @@ function showResult(type) {
   if (!document.getElementById('reset-row')) {
     const d = document.createElement('div');
     d.className='reset-row'; d.id='reset-row';
-    d.innerHTML='<button class="btn btn-secondary" onclick="resetAll()">↻ Start Over</button>';
+    d.innerHTML='<button class="btn btn-ghost" onclick="resetAll()">↻ Start Over</button>';
     document.getElementById('ref-sections-inline').before(d);
   }
   area.scrollIntoView({behavior:'smooth',block:'center'});
@@ -616,7 +573,7 @@ function calculateEGFR() {
   });
 
   if (bsa) {
-    html += `<div style="font-size:.78rem;color:var(--text-light);margin-top:.25rem">BSA: ${bsa.toFixed(2)} m² · Values are BSA-adjusted (absolute GFR for drug dosing)</div>`;
+    html += `<div style="font-size:.8125rem;color:var(--c-text-tertiary);margin-top:var(--s-1)">BSA: ${bsa.toFixed(2)} m² · Values are BSA-adjusted (absolute GFR for drug dosing)</div>`;
   }
 
   // CKD staging based on best available (prefer combined)
@@ -637,7 +594,7 @@ function calculateEGFR() {
   if (crVal && cysVal) {
     const diff = Math.abs(crVal.value - cysVal.value) / Math.max(crVal.value, cysVal.value) * 100;
     if (diff > 20) {
-      html += `<div style="margin-top:.75rem;padding:.6rem .8rem;background:var(--purple-light);border-left:4px solid var(--purple);border-radius:var(--radius-sm);font-size:.82rem;color:var(--purple)"><strong>⚠ Discordance detected (${Math.round(diff)}%)</strong> — eGFRcr and eGFRcys differ by >20%. Use the combined equation (eGFRcr-cys). Investigate confounders. See Reference tab.</div>`;
+      html += `<div class="alert alert-purple" style="margin-top:var(--s-3)"><strong>⚠ Discordance detected (${Math.round(diff)}%)</strong> — eGFRcr and eGFRcys differ by >20%. Use the combined equation (eGFRcr-cys). Investigate confounders. See Reference tab.</div>`;
     }
   }
 

@@ -19,133 +19,115 @@
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
   <title>AVS SmartPhrase Excel Generator — ClinForge</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
   <style>
-    :root {
-      --navy: #163B5C;
-      --navy-deep: #0E2640;
-      --teal: #0B7A7D;
-      --teal-light: #E0F7F6;
-      --green: #1B7A3D;
-      --green-light: #E3F4E8;
-      --orange: #C65100;
-      --orange-light: #FFF0E0;
-      --red: #A12B2B;
-      --red-light: #FDEAEA;
-      --amber: #B8860B;
-      --amber-light: #FFF8E1;
-      --bg: #F8F9FB;
-      --surface: #FFFFFF;
-      --text: #1A1A2E;
-      --text-mid: #4A4A5A;
-      --text-light: #7A7A8A;
-      --border: #E2E4EA;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem; line-height: 1.6;
-      color: var(--text); background: var(--bg);
-    }
-    .nav {
-      position: sticky; top: 0; z-index: 100;
-      background: var(--navy-deep);
-      padding: 12px 24px;
-      display: flex; align-items: center; gap: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    .nav-title { color: #fff; font-weight: 700; font-size: 1rem; white-space: nowrap; }
-    .nav-tabs { display: flex; gap: 4px; margin-left: auto; }
-    .nav-tab {
-      background: transparent; border: none;
-      color: rgba(255,255,255,0.6); font-family: 'DM Sans', sans-serif;
-      font-size: 0.85rem; font-weight: 600;
-      padding: 8px 16px; border-radius: 6px;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.1); }
-    .nav-tab.active { color: #fff; background: var(--teal); }
-    .main { max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }
+    /* === AVS SmartPhrase page-specific styles === */
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    .card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; padding: 24px; margin-bottom: 16px;
+
+    /* Nav tabs — must keep class "nav-tab" for JS querySelector */
+    .nav-tab {
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--c-text-tertiary);
+      background: none;
+      border: none;
+      padding: var(--s-3) var(--s-4);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color var(--duration-fast);
     }
-    .card-title { font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 16px; }
+    .nav-tab:hover { color: var(--c-text-secondary); }
+    .nav-tab.active {
+      color: var(--c-accent);
+      border-bottom-color: var(--c-accent);
+    }
+
+    /* Labels & hints */
     label {
       display: block; font-weight: 600; font-size: 0.85rem;
-      color: var(--text-mid); margin-bottom: 4px; margin-top: 12px;
+      color: var(--c-text-secondary); margin-bottom: 4px; margin-top: 12px;
     }
     label:first-child { margin-top: 0; }
     input[type="text"], textarea, select {
       width: 100%; padding: 10px 12px;
-      border: 1px solid var(--border); border-radius: 8px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
-      color: var(--text); background: var(--bg); transition: border-color 0.2s;
+      border: 1px solid var(--c-border-strong); border-radius: 8px;
+      font-family: var(--font-body); font-size: 0.9rem;
+      color: var(--c-text); background: var(--c-bg); transition: border-color 0.2s;
     }
     input:focus, textarea:focus, select:focus {
-      outline: none; border-color: var(--teal);
-      box-shadow: 0 0 0 3px rgba(11,122,125,0.1);
+      outline: none; border-color: var(--c-accent);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
     }
     textarea { resize: vertical; min-height: 80px; }
-    .hint { font-size: 0.78rem; color: var(--text-light); margin-top: 2px; }
+    .hint { font-size: 0.78rem; color: var(--c-text-tertiary); margin-top: 2px; }
+
+    /* Location entries */
     .location-entry {
-      background: var(--bg); border: 1px solid var(--border);
+      background: var(--c-bg); border: 1px solid var(--c-border-strong);
       border-radius: 8px; padding: 16px; margin-bottom: 12px; position: relative;
     }
     .entry-header {
       display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
     }
-    .entry-num { font-weight: 700; font-size: 0.85rem; color: var(--teal); }
+    .entry-num { font-weight: 700; font-size: 0.85rem; color: var(--c-accent); }
     .remove-btn {
-      background: var(--red-light); color: var(--red);
+      background: var(--c-danger-light); color: var(--c-danger);
       border: none; border-radius: 6px; padding: 4px 10px;
-      font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: var(--font-body);
     }
-    .remove-btn:hover { background: var(--red); color: #fff; }
+    .remove-btn:hover { background: var(--c-danger); color: #fff; }
     .location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
     .location-grid .full-width { grid-column: 1 / -1; }
+
+    /* Section entries */
     .section-entry {
-      background: var(--amber-light); border: 1px solid var(--border);
+      background: var(--c-warning-light); border: 1px solid var(--c-border-strong);
       border-radius: 8px; padding: 12px 16px; margin-bottom: 12px;
       display: flex; align-items: center; gap: 12px;
     }
     .section-badge {
-      background: var(--amber); color: #fff;
+      background: var(--c-warning); color: #fff;
       font-size: 0.7rem; font-weight: 700;
       padding: 2px 8px; border-radius: 4px; white-space: nowrap;
     }
     .section-entry input { flex: 1; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 20px; border-radius: 8px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
-      font-weight: 600; cursor: pointer; border: none; transition: all 0.2s;
+
+    /* Btn-secondary — kept page-specific because JS uses this class */
+    .btn-secondary {
+      background: var(--c-bg); color: var(--c-accent);
+      border: 1px solid var(--c-border-strong);
     }
-    .btn-primary { background: var(--teal); color: #fff; }
-    .btn-primary:hover { background: #096668; }
-    .btn-secondary { background: var(--bg); color: var(--teal); border: 1px solid var(--border); }
-    .btn-secondary:hover { background: var(--teal-light); }
-    .btn-accent { background: var(--navy); color: #fff; }
-    .btn-accent:hover { background: var(--navy-deep); }
-    .btn-sm { padding: 6px 14px; font-size: 0.78rem; }
+    .btn-secondary:hover { background: var(--c-accent-muted); }
+
+    /* Btn-row */
     .btn-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+    /* Generate button */
     .btn-generate {
-      background: var(--green); color: #fff;
+      background: var(--c-success); color: #fff;
       padding: 14px 32px; font-size: 1rem; font-weight: 700;
       border-radius: 10px; border: none; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: all 0.2s; width: 100%;
+      font-family: var(--font-body); transition: all 0.2s; width: 100%;
     }
-    .btn-generate:hover { background: #156b32; }
+    .btn-generate:hover { background: #15803d; }
+
+    /* Paste area */
     .paste-area {
       width: 100%; min-height: 300px; padding: 16px;
-      border: 2px dashed var(--border); border-radius: 12px;
-      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
-      line-height: 1.5; color: var(--text); background: var(--surface); resize: vertical;
+      border: 2px dashed var(--c-border-strong); border-radius: 12px;
+      font-family: var(--font-mono); font-size: 0.82rem;
+      line-height: 1.5; color: var(--c-text); background: var(--c-surface); resize: vertical;
     }
-    .paste-area:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(11,122,125,0.1); outline: none; }
+    .paste-area:focus { border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.12); outline: none; }
+
+    /* Preview table */
     .preview-table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 10px; }
     .preview-table td { border: 1px solid #ccc; padding: 8px 10px; vertical-align: top; }
     .preview-table .hdr { background: #0E2640; color: #fff; text-align: center; font-weight: 700; font-size: 14px; padding: 12px; }
@@ -158,47 +140,40 @@
     .preview-table .tag { text-align: center; font-weight: 700; font-style: italic; padding: 8px; }
     .preview-table .ln { font-weight: 700; }
     .preview-table .lp { color: #0000FF; font-weight: 700; }
+
+    /* Status bar */
     .status-bar {
-      background: var(--amber-light); border: 1px solid var(--amber);
+      background: var(--c-warning-light); border: 1px solid var(--c-warning);
       border-radius: 8px; padding: 10px 16px; font-size: 0.82rem;
-      color: var(--amber); font-weight: 600; margin-bottom: 16px; display: none;
+      color: var(--c-warning); font-weight: 600; margin-bottom: 16px; display: none;
     }
-    .status-bar.error { background: var(--red-light); border-color: var(--red); color: var(--red); }
-    .status-bar.success { background: var(--green-light); border-color: var(--green); color: var(--green); }
+    .status-bar.error { background: var(--c-danger-light); border-color: var(--c-danger); color: var(--c-danger); }
+    .status-bar.success { background: var(--c-success-light); border-color: var(--c-success); color: var(--c-success); }
     .status-bar.visible { display: block; }
+
+    /* Reference blocks */
     .ref-block {
-      background: var(--bg); border-left: 3px solid var(--teal);
+      background: var(--c-bg); border-left: 3px solid var(--c-accent);
       padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 12px;
     }
-    .ref-block-title { font-weight: 700; font-size: 0.85rem; color: var(--navy); margin-bottom: 4px; }
+    .ref-block-title { font-weight: 700; font-size: 0.85rem; color: var(--c-navy); margin-bottom: 4px; }
     .ref-block code {
-      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
-      background: var(--surface); padding: 1px 6px; border-radius: 4px;
+      font-family: var(--font-mono); font-size: 0.82rem;
+      background: var(--c-surface); padding: 1px 6px; border-radius: 4px;
     }
-    .toast {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--green); color: #fff;
-      padding: 12px 24px; border-radius: 8px;
-      font-weight: 600; font-size: 0.85rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transform: translateY(100px); opacity: 0;
-      transition: all 0.3s ease; z-index: 200;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .footer {
-      max-width: 900px; margin: 0 auto; padding: 24px 16px;
-      text-align: center; font-size: 0.75rem; line-height: 1.5; color: var(--text-light);
-    }
-    .footer a { color: var(--teal); text-decoration: none; }
-    .footer a:hover { text-decoration: underline; }
-    .drag-handle { cursor: grab; color: var(--text-light); font-size: 1.1rem; user-select: none; padding: 0 4px; }
+
+    /* Toast — page-specific override for background */
+    .toast { background: var(--c-success); color: var(--c-text-inverse); }
+
+    /* Drag and drop */
+    .drag-handle { cursor: grab; color: var(--c-text-tertiary); font-size: 1.1rem; user-select: none; padding: 0 4px; }
     .drag-handle:active { cursor: grabbing; }
     .dragging { opacity: 0.4; }
-    .drag-over { border-top: 3px solid var(--teal) !important; }
+    .drag-over { border-top: 3px solid var(--c-accent) !important; }
+
     @media (max-width: 600px) {
-      .nav { padding: 10px 12px; flex-wrap: wrap; }
-      .nav-tabs { margin-left: 0; width: 100%; overflow-x: auto; }
-      .main { padding: 16px 10px 64px; }
+      .tab-bar { overflow-x: auto; }
+      .nav-tab { white-space: nowrap; font-size: 0.8125rem; padding: var(--s-3); }
       .card { padding: 16px; }
       .location-grid { grid-template-columns: 1fr; }
       .btn-row { flex-direction: column; }
@@ -206,16 +181,26 @@
   </style>
 </head>
 <body>
-<nav class="nav">
-  <span class="nav-title">📄 AVS SmartPhrase Generator</span>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchTab('form')">Form</button>
-    <button class="nav-tab" onclick="switchTab('paste')">Paste</button>
-    <button class="nav-tab" onclick="switchTab('preview')">Preview</button>
-    <button class="nav-tab" onclick="switchTab('reference')">Reference</button>
+
+<div class="container-full" style="padding-top:var(--s-6);padding-bottom:var(--s-12);">
+  <div class="tool-header">
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      ClinForge Tools
+    </a>
+    <h1>AVS SmartPhrase Generator</h1>
+    <div class="tool-meta">v1.0<span>·</span>March 2026</div>
   </div>
-</nav>
-<div class="main">
+</div>
+
+<div class="tab-bar">
+  <button class="nav-tab active" onclick="switchTab('form')">Form</button>
+  <button class="nav-tab" onclick="switchTab('paste')">Paste</button>
+  <button class="nav-tab" onclick="switchTab('preview')">Preview</button>
+  <button class="nav-tab" onclick="switchTab('reference')">Reference</button>
+</div>
+
+<div class="container-full" style="padding-top:var(--s-6);padding-bottom:var(--s-16);">
   <!-- FORM TAB -->
   <div id="tab-form" class="tab-content active">
     <div class="card">
@@ -301,7 +286,7 @@ TAGLINE: Your health is our priority"></textarea>
       <div class="card-title">Preview</div>
       <p class="hint" style="margin-bottom:12px">Approximate preview of the Excel output. Mirrors Epic paste formatting.</p>
       <div id="preview-container">
-        <p style="color:var(--text-light);font-style:italic;">No content yet. Use Form or Paste tab first.</p>
+        <p style="color:var(--c-text-tertiary);font-style:italic;">No content yet. Use Form or Paste tab first.</p>
       </div>
     </div>
     <div class="btn-row">
@@ -338,18 +323,22 @@ TAGLINE: Your health is our priority"></textarea>
     </div>
     <div class="card">
       <div class="card-title">Tool Info</div>
-      <p style="font-size:0.82rem;color:var(--text-mid);">
+      <p style="font-size:0.82rem;color:var(--c-text-secondary);">
         v1.0 &middot; March 2026 &middot; Generates styled .xlsx in-browser via ExcelJS.<br>
         No data sent to any server. All processing is local.
       </p>
     </div>
   </div>
 </div>
-<footer class="footer">
-  <p>Disclaimer: These are personal clinical reference tools created by an individual clinician. They are not institutionally endorsed, reviewed, or maintained by any healthcare organization. They do not constitute medical advice and should not be used as the sole basis for clinical decisions. Always use clinical judgment and verify against current guidelines before making patient care decisions. The author assumes no liability for clinical outcomes resulting from use of these tools.</p>
-  <p style="margin-top:8px;font-weight:600;">Walter Hernandez, MSN, MPH, FNP-C</p>
-  <p style="margin-top:8px;"><a href="index.html">&larr; Back to ClinForge Tools</a></p>
+
+<footer class="site-footer">
+  <div class="container-full" style="padding-top:0;padding-bottom:0">
+    <p class="disclaimer"><strong>Disclaimer:</strong> These are personal clinical reference tools created by an individual clinician. They are not institutionally endorsed, reviewed, or maintained by any healthcare organization. They do not constitute medical advice. Always use clinical judgment and verify against current guidelines before making patient care decisions.</p>
+    <p class="footer-author">Walter Hernandez, MSN, MPH, FNP-C</p>
+    <a class="footer-link" href="index.html">&larr; Back to ClinForge Tools</a>
+  </div>
 </footer>
+
 <div class="toast" id="toast"></div>
 <script>
 // ===== STATE =====
