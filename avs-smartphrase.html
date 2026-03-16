@@ -1,392 +1,478 @@
 <!--
   ClinForge Tool Metadata
   Name: AVS SmartPhrase Excel Generator
-  Version: v1.0
+  Version: v2.0
   Date: 2026-03-16
   Risk Tier: LOW
-  Sources: Epic formatting verification (2026-02-10), ClinForge AVS Module v2.0
+  Sources: Epic formatting verification (2026-03-16), ClinForge AVS Module v2.0
   Confidence: CURRENT
   Last Verified: 2026-03-16
-  Verified Via: N/A (formatting tool — no clinical content)
+  Verified Via: Epic paste testing — cell-level formatting only, no richText
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AVS SmartPhrase Excel Generator — ClinForge clinical reference tool">
+  <meta name="description" content="AVS SmartPhrase Excel Generator v2.0 — ClinForge">
   <meta name="author" content="Walter Hernandez, MSN, MPH, FNP-C">
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
-  <title>AVS SmartPhrase Excel Generator — ClinForge</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>AVS SmartPhrase Generator v2.0 — ClinForge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
   <style>
-    :root {
-      --navy: #163B5C;
-      --navy-deep: #0E2640;
-      --teal: #0B7A7D;
-      --teal-light: #E0F7F6;
-      --green: #1B7A3D;
-      --green-light: #E3F4E8;
-      --orange: #C65100;
-      --orange-light: #FFF0E0;
-      --red: #A12B2B;
-      --red-light: #FDEAEA;
-      --amber: #B8860B;
-      --amber-light: #FFF8E1;
-      --bg: #F8F9FB;
-      --surface: #FFFFFF;
-      --text: #1A1A2E;
-      --text-mid: #4A4A5A;
-      --text-light: #7A7A8A;
-      --border: #E2E4EA;
+    /* AVS Generator — tool-specific styles on ClinForge Design System */
+
+    /* Wider container for 2-col form */
+    .avs-container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-6) var(--space-16);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem; line-height: 1.6;
-      color: var(--text); background: var(--bg);
+    .avs-nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      display: flex;
+      padding: 0 var(--space-6);
     }
-    .nav {
-      position: sticky; top: 0; z-index: 100;
-      background: var(--navy-deep);
-      padding: 12px 24px;
-      display: flex; align-items: center; gap: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+
+    /* Card titles — section-label style */
+    .card-title {
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      margin-bottom: var(--space-4);
     }
-    .nav-title { color: #fff; font-weight: 700; font-size: 1rem; white-space: nowrap; }
-    .nav-tabs { display: flex; gap: 4px; margin-left: auto; }
-    .nav-tab {
-      background: transparent; border: none;
-      color: rgba(255,255,255,0.6); font-family: 'DM Sans', sans-serif;
-      font-size: 0.85rem; font-weight: 600;
-      padding: 8px 16px; border-radius: 6px;
-      cursor: pointer; transition: all 0.2s;
+
+    /* Form grid */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-2) var(--space-4);
     }
-    .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.1); }
-    .nav-tab.active { color: #fff; background: var(--teal); }
-    .main { max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    .form-row .span-2 { grid-column: 1 / -1; }
+    .form-group { margin-bottom: 0; }
+
+    /* Location entries */
+    .loc-entry {
+      background: var(--bg);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: var(--space-4);
+      margin-bottom: var(--space-3);
+      transition: border-color var(--transition);
     }
-    .card-title { font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 16px; }
-    label {
-      display: block; font-weight: 600; font-size: 0.85rem;
-      color: var(--text-mid); margin-bottom: 4px; margin-top: 12px;
+    .loc-entry:focus-within { border-color: var(--accent); }
+    .loc-head {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-bottom: var(--space-2);
     }
-    label:first-child { margin-top: 0; }
-    input[type="text"], textarea, select {
-      width: 100%; padding: 10px 12px;
-      border: 1px solid var(--border); border-radius: 8px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
-      color: var(--text); background: var(--bg); transition: border-color 0.2s;
+    .loc-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
     }
-    input:focus, textarea:focus, select:focus {
-      outline: none; border-color: var(--teal);
-      box-shadow: 0 0 0 3px rgba(11,122,125,0.1);
+    .loc-actions { margin-left: auto; display: flex; gap: var(--space-1); }
+    .loc-toggle, .loc-remove {
+      background: none; border: none;
+      font-size: 0.75rem; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', system-ui, sans-serif;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition);
     }
-    textarea { resize: vertical; min-height: 80px; }
-    .hint { font-size: 0.78rem; color: var(--text-light); margin-top: 2px; }
-    .location-entry {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px; padding: 16px; margin-bottom: 12px; position: relative;
+    .loc-toggle { color: var(--accent); }
+    .loc-toggle:hover { background: var(--accent-subtle); }
+    .loc-remove { color: var(--danger); }
+    .loc-remove:hover { background: var(--danger-light); }
+    .loc-extra { display: none; margin-top: var(--space-2); }
+    .loc-extra.open { display: block; }
+
+    /* Section divider entries */
+    .sec-entry {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      margin-bottom: var(--space-3);
+      background: var(--warning-light);
+      border: 1px solid var(--warning-border);
+      border-radius: var(--radius);
     }
-    .entry-header {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+    .sec-badge {
+      background: var(--warning);
+      color: #fff;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.625rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
     }
-    .entry-num { font-weight: 700; font-size: 0.85rem; color: var(--teal); }
-    .remove-btn {
-      background: var(--red-light); color: var(--red);
-      border: none; border-radius: 6px; padding: 4px 10px;
-      font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    .sec-entry .form-input { flex: 1; }
+
+    /* Drag and drop */
+    .drag-handle {
+      cursor: grab;
+      color: var(--text-tertiary);
+      font-size: 1.1rem;
+      user-select: none;
+      padding: 0 var(--space-1);
     }
-    .remove-btn:hover { background: var(--red); color: #fff; }
-    .location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
-    .location-grid .full-width { grid-column: 1 / -1; }
-    .section-entry {
-      background: var(--amber-light); border: 1px solid var(--border);
-      border-radius: 8px; padding: 12px 16px; margin-bottom: 12px;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .section-badge {
-      background: var(--amber); color: #fff;
-      font-size: 0.7rem; font-weight: 700;
-      padding: 2px 8px; border-radius: 4px; white-space: nowrap;
-    }
-    .section-entry input { flex: 1; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 20px; border-radius: 8px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
-      font-weight: 600; cursor: pointer; border: none; transition: all 0.2s;
-    }
-    .btn-primary { background: var(--teal); color: #fff; }
-    .btn-primary:hover { background: #096668; }
-    .btn-secondary { background: var(--bg); color: var(--teal); border: 1px solid var(--border); }
-    .btn-secondary:hover { background: var(--teal-light); }
-    .btn-accent { background: var(--navy); color: #fff; }
-    .btn-accent:hover { background: var(--navy-deep); }
-    .btn-sm { padding: 6px 14px; font-size: 0.78rem; }
-    .btn-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .drag-handle:active { cursor: grabbing; }
+    .dragging { opacity: 0.35; }
+    .drag-over { border-top: 3px solid var(--accent) !important; }
+
+    /* Button row */
+    .btn-row { display: flex; gap: var(--space-2); margin-top: var(--space-4); flex-wrap: wrap; }
+    .btn-sm { padding: var(--space-1) var(--space-3); font-size: 0.8125rem; }
+
+    /* Generate CTA */
     .btn-generate {
-      background: var(--green); color: #fff;
-      padding: 14px 32px; font-size: 1rem; font-weight: 700;
-      border-radius: 10px; border: none; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: all 0.2s; width: 100%;
+      width: 100%;
+      padding: var(--space-4) var(--space-8);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      background: var(--success);
+      color: #fff;
+      transition: all var(--transition);
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
     }
-    .btn-generate:hover { background: #156b32; }
+    .btn-generate:hover { background: #047857; transform: scale(1.01); }
+    .btn-generate:active { transform: scale(0.99); }
+
+    /* Paste textarea */
     .paste-area {
-      width: 100%; min-height: 300px; padding: 16px;
-      border: 2px dashed var(--border); border-radius: 12px;
-      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
-      line-height: 1.5; color: var(--text); background: var(--surface); resize: vertical;
+      width: 100%;
+      min-height: 280px;
+      padding: var(--space-4);
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--surface);
+      resize: vertical;
+      transition: border-color var(--transition), box-shadow var(--transition);
     }
-    .paste-area:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(11,122,125,0.1); outline: none; }
+    .paste-area:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-subtle);
+    }
+
+    /* Preview table — mirrors Excel output */
     .preview-table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 10px; }
     .preview-table td { border: 1px solid #ccc; padding: 8px 10px; vertical-align: top; }
     .preview-table .hdr { background: #0E2640; color: #fff; text-align: center; font-weight: 700; font-size: 14px; padding: 12px; }
     .preview-table .ph { text-align: center; padding: 8px; }
     .preview-table .ph span { color: #0000FF; font-weight: 700; font-size: 12px; }
-    .preview-table .sub { text-align: center; font-weight: 700; font-size: 11px; padding: 6px; }
-    .preview-table .stx { text-align: center; font-style: italic; color: #4A4A5A; padding: 4px; }
     .preview-table .sec { background: #D9D9D9; font-weight: 700; text-align: center; font-size: 11px; padding: 8px; }
-    .preview-table .ftr { text-align: center; font-size: 9px; color: #4A4A5A; padding: 6px; }
-    .preview-table .tag { text-align: center; font-weight: 700; font-style: italic; padding: 8px; }
-    .preview-table .ln { font-weight: 700; }
+    .preview-table .ftr { text-align: center; font-size: 9px; color: #666; padding: 6px; }
+    .preview-table .ln { font-weight: 700; font-size: 10px; }
     .preview-table .lp { color: #0000FF; font-weight: 700; }
+    .preview-table .loc-cell { line-height: 1.6; }
+    .preview-table .loc-cell .loc-line { display: block; }
+
+    /* Status bar */
     .status-bar {
-      background: var(--amber-light); border: 1px solid var(--amber);
-      border-radius: 8px; padding: 10px 16px; font-size: 0.82rem;
-      color: var(--amber); font-weight: 600; margin-bottom: 16px; display: none;
+      border-radius: var(--radius-sm);
+      padding: var(--space-3) var(--space-4);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-bottom: var(--space-4);
+      display: none;
     }
-    .status-bar.error { background: var(--red-light); border-color: var(--red); color: var(--red); }
-    .status-bar.success { background: var(--green-light); border-color: var(--green); color: var(--green); }
     .status-bar.visible { display: block; }
-    .ref-block {
-      background: var(--bg); border-left: 3px solid var(--teal);
-      padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 12px;
-    }
-    .ref-block-title { font-weight: 700; font-size: 0.85rem; color: var(--navy); margin-bottom: 4px; }
-    .ref-block code {
-      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
-      background: var(--surface); padding: 1px 6px; border-radius: 4px;
-    }
+    .status-bar.error { background: var(--danger-light); border: 1px solid var(--danger-border); color: var(--danger); }
+    .status-bar.success { background: var(--success-light); border: 1px solid var(--success-border); color: var(--success); }
+
+    /* Toast */
     .toast {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--green); color: #fff;
-      padding: 12px 24px; border-radius: 8px;
-      font-weight: 600; font-size: 0.85rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transform: translateY(100px); opacity: 0;
-      transition: all 0.3s ease; z-index: 200;
+      position: fixed;
+      bottom: var(--space-6);
+      right: var(--space-6);
+      background: var(--success);
+      color: #fff;
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s var(--ease);
+      z-index: 200;
     }
     .toast.show { transform: translateY(0); opacity: 1; }
-    .footer {
-      max-width: 900px; margin: 0 auto; padding: 24px 16px;
-      text-align: center; font-size: 0.75rem; line-height: 1.5; color: var(--text-light);
+
+    /* Reference blocks */
+    .ref-block {
+      background: var(--bg);
+      border-left: 3px solid var(--accent);
+      padding: var(--space-3) var(--space-4);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-bottom: var(--space-3);
+      font-size: 0.875rem;
     }
-    .footer a { color: var(--teal); text-decoration: none; }
-    .footer a:hover { text-decoration: underline; }
-    .drag-handle { cursor: grab; color: var(--text-light); font-size: 1.1rem; user-select: none; padding: 0 4px; }
-    .drag-handle:active { cursor: grabbing; }
-    .dragging { opacity: 0.4; }
-    .drag-over { border-top: 3px solid var(--teal) !important; }
-    @media (max-width: 600px) {
-      .nav { padding: 10px 12px; flex-wrap: wrap; }
-      .nav-tabs { margin-left: 0; width: 100%; overflow-x: auto; }
-      .main { padding: 16px 10px 64px; }
-      .card { padding: 16px; }
-      .location-grid { grid-template-columns: 1fr; }
+    .ref-block-title {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--text);
+      margin-bottom: var(--space-1);
+    }
+    .ref-block code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8125rem;
+      background: var(--surface);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .avs-container { padding: var(--space-4) var(--space-4) var(--space-12); }
+      .avs-nav-inner { padding: 0 var(--space-4); }
+      .form-row { grid-template-columns: 1fr; }
       .btn-row { flex-direction: column; }
     }
   </style>
 </head>
 <body>
-<nav class="nav">
-  <span class="nav-title">📄 AVS SmartPhrase Generator</span>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchTab('form')">Form</button>
+
+<!-- Nav bar -->
+<nav class="nav-bar">
+  <div class="avs-nav-inner">
+    <button class="nav-tab active" onclick="switchTab('build')">Build</button>
     <button class="nav-tab" onclick="switchTab('paste')">Paste</button>
     <button class="nav-tab" onclick="switchTab('preview')">Preview</button>
-    <button class="nav-tab" onclick="switchTab('reference')">Reference</button>
+    <button class="nav-tab" onclick="switchTab('ref')">Reference</button>
   </div>
 </nav>
-<div class="main">
-  <!-- FORM TAB -->
-  <div id="tab-form" class="tab-content active">
-    <div class="card">
+
+<!-- Tool header -->
+<div class="avs-container" style="padding-bottom:0">
+  <div style="padding:var(--space-6) 0 var(--space-4)">
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg>
+      Back to Tools
+    </a>
+    <h1 style="font-size:1.75rem;margin-top:var(--space-3)">AVS SmartPhrase Generator</h1>
+    <p class="tool-header__meta">v2.0 &middot; Cell-level formatting &middot; Epic paste verified</p>
+  </div>
+</div>
+
+<div class="avs-container" style="padding-top:0">
+
+  <!-- ===== BUILD TAB ===== -->
+  <div id="tab-build" class="panel active">
+    <div class="card stagger-in" style="margin-bottom:var(--space-4)">
       <div class="card-title">Header</div>
-      <label for="sp-name">SmartPhrase Name</label>
-      <input type="text" id="sp-name" placeholder=".wwavstopic" value=".wwavs">
-      <p class="hint">Naming: .wwavs[topic] — e.g., .wwavsiehpeducation</p>
-      <label for="sp-title">Title</label>
-      <input type="text" id="sp-title" placeholder="Resource Directory Title">
-      <label for="sp-phone">Hotline / Main Phone (optional)</label>
-      <input type="text" id="sp-phone" placeholder="(951) 555-1234">
-      <label for="sp-subtitle">Subtitle (optional)</label>
-      <input type="text" id="sp-subtitle" placeholder="">
-      <label for="sp-subtext">Subtext (optional)</label>
-      <input type="text" id="sp-subtext" placeholder="Italic subtext line">
-    </div>
-    <div class="card">
-      <div class="card-title">Entries</div>
-      <p class="hint" style="margin-bottom:12px">Add locations and section dividers. Drag ⠿ to reorder.</p>
-      <div id="entries-container"></div>
-      <div class="btn-row">
-        <button class="btn btn-primary btn-sm" onclick="addLocation()">+ Location</button>
-        <button class="btn btn-secondary btn-sm" onclick="addSection()">+ Section Divider</button>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">SmartPhrase Name</label>
+          <input type="text" class="form-input" id="sp-name" placeholder=".wwavstopic" value=".wwavs">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hotline / Phone (optional)</label>
+          <input type="text" class="form-input" id="sp-phone" placeholder="(951) 555-1234">
+        </div>
+        <div class="form-group span-2">
+          <label class="form-label">Title</label>
+          <input type="text" class="form-input" id="sp-title" placeholder="Resource Directory Title">
+        </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Footer</div>
-      <label for="sp-footer">Footer Text (optional)</label>
-      <textarea id="sp-footer" rows="2" placeholder="Admin info, hours, notes..."></textarea>
-      <label for="sp-tagline">Tagline (optional)</label>
-      <input type="text" id="sp-tagline" placeholder="Bold italic tagline at bottom">
+
+    <div class="card stagger-in" style="margin-bottom:var(--space-4)">
+      <div class="card-title">Locations</div>
+      <div id="entries-container"></div>
+      <div class="btn-row">
+        <button class="btn btn--accent btn-sm" onclick="addLocation()">+ Location</button>
+        <button class="btn btn--secondary btn-sm" onclick="addSection()">+ Section Divider</button>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-title">Settings</div>
-      <label for="sp-cols">Column Layout</label>
-      <select id="sp-cols">
-        <option value="2">2-column (side-by-side locations)</option>
-        <option value="1">1-column (full-width entries)</option>
-      </select>
-      <p class="hint">2-column verified for Epic paste. Use 1-column for lengthy entries.</p>
+
+    <div class="card stagger-in" style="margin-bottom:var(--space-4)">
+      <div class="card-title">Footer (optional)</div>
+      <div class="form-group">
+        <input type="text" class="form-input" id="sp-footer" placeholder="Admin info, hours, notes...">
+      </div>
     </div>
+
     <div id="form-status" class="status-bar"></div>
     <button class="btn-generate" onclick="generateFromForm()">Generate Excel (.xlsx)</button>
   </div>
-  <!-- PASTE TAB -->
-  <div id="tab-paste" class="tab-content">
+
+  <!-- ===== PASTE TAB ===== -->
+  <div id="tab-paste" class="panel">
     <div class="card">
       <div class="card-title">Paste Raw Content</div>
-      <p class="hint" style="margin-bottom:12px">
-        Paste structured text — one location per block, blank lines between.
-        Start a line with <code>---</code> for a section divider.
+      <p class="form-hint" style="margin-bottom:var(--space-3)">
+        One location per block, blank line between each. Start a line with <code>---</code> for a section divider.
       </p>
       <textarea class="paste-area" id="paste-input" placeholder="TITLE: My Resource Directory
 PHONE: (951) 555-1234
-SUBTITLE: Optional subtitle
 SMARTPHRASE: .wwavsexample
+
 Location Name
 123 Main St, City, CA 92501
 (951) 555-0001
 Mon-Fri 8am-5pm
+
 Another Location
 456 Oak Ave, City, CA 92502
 (951) 555-0002
 Mon-Fri 9am-6pm
+
 --- Specialty Resources
+
 Specialty Clinic
 789 Pine Blvd, City, CA 92503
 (951) 555-0003
 By appointment only
-FOOTER: Call for more information
-TAGLINE: Your health is our priority"></textarea>
+
+FOOTER: Call for more information"></textarea>
       <div class="btn-row">
-        <button class="btn btn-primary" onclick="parseAndGenerate()">Parse &amp; Generate Excel</button>
-        <button class="btn btn-secondary" onclick="parseAndPreview()">Parse &amp; Preview</button>
-        <button class="btn btn-secondary" onclick="clearPaste()">Clear</button>
+        <button class="btn btn--accent" onclick="parseAndGenerate()">Parse &amp; Generate</button>
+        <button class="btn btn--secondary" onclick="parseAndPreview()">Parse &amp; Preview</button>
+        <button class="btn btn--secondary" onclick="clearPaste()">Clear</button>
       </div>
-      <div id="paste-status" class="status-bar" style="margin-top:12px"></div>
+      <div id="paste-status" class="status-bar" style="margin-top:var(--space-3)"></div>
     </div>
   </div>
-  <!-- PREVIEW TAB -->
-  <div id="tab-preview" class="tab-content">
+
+  <!-- ===== PREVIEW TAB ===== -->
+  <div id="tab-preview" class="panel">
     <div class="card">
       <div class="card-title">Preview</div>
-      <p class="hint" style="margin-bottom:12px">Approximate preview of the Excel output. Mirrors Epic paste formatting.</p>
+      <p class="form-hint" style="margin-bottom:var(--space-3)">Approximates the Excel output as it will appear in Epic.</p>
       <div id="preview-container">
-        <p style="color:var(--text-light);font-style:italic;">No content yet. Use Form or Paste tab first.</p>
+        <p style="color:var(--text-tertiary);font-style:italic;">No content yet. Use Build or Paste tab first.</p>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-accent" onclick="generateFromPreview()">Download Excel (.xlsx)</button>
+      <button class="btn btn--accent" onclick="generateFromPreview()">Download Excel (.xlsx)</button>
     </div>
   </div>
-  <!-- REFERENCE TAB -->
-  <div id="tab-reference" class="tab-content">
-    <div class="card">
+
+  <!-- ===== REFERENCE TAB ===== -->
+  <div id="tab-ref" class="panel">
+    <div class="card" style="margin-bottom:var(--space-4)">
       <div class="card-title">Epic Paste Workflow</div>
       <div class="ref-block">
         <div class="ref-block-title">Steps</div>
         <p>1. Open .xlsx in <strong>Excel</strong> (not Google Sheets)<br>
         2. Select all (Ctrl+A) &rarr; Copy (Ctrl+C)<br>
         3. Paste into Epic SmartPhrase editor or Patient Instructions<br>
-        4. Verify formatting &rarr; Save SmartPhrase</p>
+        4. Verify formatting &rarr; Save</p>
       </div>
       <div class="ref-block">
-        <div class="ref-block-title">Epic-Safe Formatting (verified 2026-02-10)</div>
-        <p><strong>Confirmed:</strong> Bold, Italic, Bold+Italic, Blue font (phones), Red font (warnings), Thin borders, Gray fill (section dividers), Merged cells, Center alignment, Wrap text, 2-column layout</p>
-        <p style="margin-top:8px"><strong>Avoid:</strong> Background highlighting on text, &gt;2 columns, Complex nested merges, Images</p>
+        <div class="ref-block-title">v2.0 Changes (Epic Compatibility)</div>
+        <p><strong>Fixed:</strong> Each data field now occupies its own row with cell-level formatting &mdash; no more richText arrays. Merged cells only on headers/sections. Predictable row heights. No spacer rows.</p>
+        <p style="margin-top:var(--space-2)"><strong>Epic-safe:</strong> Bold, Italic, Blue font (phones), Gray fill (sections), Thin borders, Merged header rows, Center alignment, Wrap text, 2-column layout.</p>
+        <p style="margin-top:var(--space-2)"><strong>Avoid:</strong> Background highlighting on text, &gt;2 columns, Complex nested merges, Images.</p>
       </div>
       <div class="ref-block">
         <div class="ref-block-title">Naming Convention</div>
-        <p><code>.wwavs[topic]</code> &mdash; e.g., <code>.wwavsiehpeducation</code> &middot; <code>.wwavsradnetxray</code></p>
+        <p><code>.wwavs[topic]</code> &mdash; e.g., <code>.wwavsiehpeducation</code></p>
       </div>
       <div class="ref-block">
         <div class="ref-block-title">Build Standards</div>
         <p>Font: Arial &middot; Body: 10pt &middot; Headers: 11&ndash;14pt bold<br>
-        Phones: Bold + Blue (#0000FF) &middot; Warnings: Bold + Red (#FF0000)<br>
-        Columns: ~48 char width &middot; Row height: 85px for location blocks<br>
-        Section dividers: Full-row merge, gray fill (#D9D9D9), bold</p>
+        Phones: Bold + Blue (#0000FF) &middot; Sections: Gray fill (#D9D9D9)<br>
+        Columns: ~48 char width &middot; Row height: 16px per field line</p>
       </div>
     </div>
     <div class="card">
       <div class="card-title">Tool Info</div>
-      <p style="font-size:0.82rem;color:var(--text-mid);">
-        v1.0 &middot; March 2026 &middot; Generates styled .xlsx in-browser via ExcelJS.<br>
-        No data sent to any server. All processing is local.
+      <p style="font-size:0.8125rem;color:var(--text-secondary);">
+        v2.0 &middot; March 2026 &middot; ExcelJS with cell-level formatting (no richText).<br>
+        All processing local &mdash; no data sent anywhere.
       </p>
     </div>
   </div>
 </div>
-<footer class="footer">
-  <p>Disclaimer: These are personal clinical reference tools created by an individual clinician. They are not institutionally endorsed, reviewed, or maintained by any healthcare organization. They do not constitute medical advice and should not be used as the sole basis for clinical decisions. Always use clinical judgment and verify against current guidelines before making patient care decisions. The author assumes no liability for clinical outcomes resulting from use of these tools.</p>
-  <p style="margin-top:8px;font-weight:600;">Walter Hernandez, MSN, MPH, FNP-C</p>
-  <p style="margin-top:8px;"><a href="index.html">&larr; Back to ClinForge Tools</a></p>
+
+<footer class="site-footer" style="max-width:780px">
+  <p class="site-footer__disclaimer">Disclaimer: These are personal clinical reference tools created by an individual clinician. They are not institutionally endorsed, reviewed, or maintained by any healthcare organization. They do not constitute medical advice and should not be used as the sole basis for clinical decisions. Always use clinical judgment and verify against current guidelines before making patient care decisions. The author assumes no liability for clinical outcomes resulting from use of these tools.</p>
+  <p class="site-footer__meta" style="margin-top:var(--space-3)"><strong>Walter Hernandez, MSN, MPH, FNP-C</strong></p>
+  <p class="site-footer__meta" style="margin-top:var(--space-3)"><a href="index.html">&larr; Back to ClinForge Tools</a></p>
 </footer>
+
 <div class="toast" id="toast"></div>
+
 <script>
 // ===== STATE =====
 let entries = [];
 let entryCounter = 0;
 let lastBuildData = null;
+
 // ===== TABS =====
 function switchTab(id) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
-  document.querySelector('.nav-tab[onclick="switchTab(\'' + id + '\')"]').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    if (t.getAttribute('onclick') === "switchTab('" + id + "')") t.classList.add('active');
+  });
   if (id === 'preview') renderPreview();
 }
+
 function showToast(msg, ms) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), ms || 3000);
 }
+
 function showStatus(id, msg, type) {
   const el = document.getElementById(id);
   el.textContent = msg; el.className = 'status-bar visible ' + (type || '');
 }
+
 function hideStatus(id) { document.getElementById(id).className = 'status-bar'; }
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function esc2(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 // ===== ENTRY MANAGEMENT =====
 function addLocation(data) {
   entries.push({ type: 'location', id: ++entryCounter, data: data || {} });
   renderEntries();
 }
+
 function addSection(title) {
   entries.push({ type: 'section', id: ++entryCounter, data: { title: title || '' } });
   renderEntries();
 }
+
 function removeEntry(id) {
   entries = entries.filter(e => e.id !== id);
   renderEntries();
 }
+
+function toggleExtra(id) {
+  const el = document.getElementById('extra-' + id);
+  if (el) el.classList.toggle('open');
+  const btn = document.getElementById('toggle-' + id);
+  if (btn) btn.textContent = el.classList.contains('open') ? '− Less' : '+ More';
+}
+
 function renderEntries() {
   const c = document.getElementById('entries-container');
   c.innerHTML = '';
@@ -396,30 +482,39 @@ function renderEntries() {
     w.dataset.idx = idx;
     w.draggable = true;
     if (entry.type === 'section') {
-      w.className = 'section-entry';
-      w.innerHTML = '<span class="drag-handle" title="Drag to reorder">⠿</span>'
-        + '<span class="section-badge">SECTION</span>'
-        + '<input type="text" value="' + esc(entry.data.title) + '" placeholder="Section title" onchange="entries[' + idx + '].data.title=this.value">'
-        + '<button class="remove-btn" onclick="removeEntry(' + entry.id + ')">✕</button>';
+      w.className = 'sec-entry';
+      w.innerHTML =
+        '<span class="drag-handle" title="Drag">⠿</span>' +
+        '<span class="sec-badge">SECTION</span>' +
+        '<input type="text" class="form-input" value="' + esc(entry.data.title) + '" placeholder="Section title" onchange="entries[' + idx + '].data.title=this.value">' +
+        '<button class="loc-remove" onclick="removeEntry(' + entry.id + ')">✕</button>';
     } else {
       locNum++;
       const d = entry.data;
-      w.className = 'location-entry';
-      w.innerHTML = '<div class="entry-header">'
-        + '<span class="drag-handle" title="Drag to reorder">⠿</span>'
-        + '<span class="entry-num">Location ' + locNum + '</span>'
-        + '<button class="remove-btn" onclick="removeEntry(' + entry.id + ')">Remove</button>'
-        + '</div>'
-        + '<div class="location-grid">'
-        + '<div class="full-width"><label>Name *</label><input type="text" value="' + esc(d.name||'') + '" placeholder="Clinic / Resource Name" onchange="entries[' + idx + '].data.name=this.value"></div>'
-        + '<div class="full-width"><label>Address</label><input type="text" value="' + esc(d.address||'') + '" placeholder="123 Main St, City, CA 92501" onchange="entries[' + idx + '].data.address=this.value"></div>'
-        + '<div><label>Phone</label><input type="text" value="' + esc(d.phone||'') + '" placeholder="(951) 555-1234" onchange="entries[' + idx + '].data.phone=this.value"></div>'
-        + '<div><label>Fax</label><input type="text" value="' + esc(d.fax||'') + '" placeholder="(951) 555-1235" onchange="entries[' + idx + '].data.fax=this.value"></div>'
-        + '<div><label>Hours</label><input type="text" value="' + esc(d.hours||'') + '" placeholder="Mon-Fri 8am-5pm" onchange="entries[' + idx + '].data.hours=this.value"></div>'
-        + '<div><label>Notes</label><input type="text" value="' + esc(d.notes||'') + '" placeholder="Walk-ins welcome" onchange="entries[' + idx + '].data.notes=this.value"></div>'
-        + '</div>';
+      w.className = 'loc-entry';
+      w.innerHTML =
+        '<div class="loc-head">' +
+          '<span class="drag-handle" title="Drag">⠿</span>' +
+          '<span class="loc-num">#' + locNum + '</span>' +
+          '<div class="loc-actions">' +
+            '<button class="loc-toggle" id="toggle-' + entry.id + '" onclick="toggleExtra(' + entry.id + ')">+ More</button>' +
+            '<button class="loc-remove" onclick="removeEntry(' + entry.id + ')">✕</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<div class="form-group span-2"><input type="text" class="form-input" value="' + esc(d.name||'') + '" placeholder="Name *" onchange="entries[' + idx + '].data.name=this.value"></div>' +
+          '<div class="form-group"><input type="text" class="form-input" value="' + esc(d.address||'') + '" placeholder="Address" onchange="entries[' + idx + '].data.address=this.value"></div>' +
+          '<div class="form-group"><input type="text" class="form-input" value="' + esc(d.phone||'') + '" placeholder="Phone" onchange="entries[' + idx + '].data.phone=this.value"></div>' +
+        '</div>' +
+        '<div class="loc-extra" id="extra-' + entry.id + '">' +
+          '<div class="form-row" style="margin-top:var(--space-2)">' +
+            '<div class="form-group"><input type="text" class="form-input" value="' + esc(d.hours||'') + '" placeholder="Hours" onchange="entries[' + idx + '].data.hours=this.value"></div>' +
+            '<div class="form-group"><input type="text" class="form-input" value="' + esc(d.fax||'') + '" placeholder="Fax" onchange="entries[' + idx + '].data.fax=this.value"></div>' +
+            '<div class="form-group span-2"><input type="text" class="form-input" value="' + esc(d.notes||'') + '" placeholder="Notes" onchange="entries[' + idx + '].data.notes=this.value"></div>' +
+          '</div>' +
+        '</div>';
     }
-    // Drag
+    // Drag events
     w.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', idx); w.classList.add('dragging'); });
     w.addEventListener('dragend', () => w.classList.remove('dragging'));
     w.addEventListener('dragover', e => { e.preventDefault(); w.classList.add('drag-over'); });
@@ -433,31 +528,29 @@ function renderEntries() {
     c.appendChild(w);
   });
 }
-function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-function esc2(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Init with 2 empty locations
 addLocation(); addLocation();
-// ===== GATHER DATA =====
+
+// ===== GATHER FORM DATA =====
 function gatherFormData() {
   return {
     name: document.getElementById('sp-name').value.trim(),
     title: document.getElementById('sp-title').value.trim(),
     phone: document.getElementById('sp-phone').value.trim(),
-    subtitle: document.getElementById('sp-subtitle').value.trim(),
-    subtext: document.getElementById('sp-subtext').value.trim(),
     footer: document.getElementById('sp-footer').value.trim(),
-    tagline: document.getElementById('sp-tagline').value.trim(),
-    cols: parseInt(document.getElementById('sp-cols').value),
     entries: entries.map(e => ({ ...e, data: { ...e.data } }))
   };
 }
+
 // ===== PASTE PARSER =====
 function parsePaste(text) {
   const lines = text.split('\n');
-  const data = { name:'', title:'', phone:'', subtitle:'', subtext:'', footer:'', tagline:'', cols:2, entries:[] };
+  const data = { name: '', title: '', phone: '', footer: '', entries: [] };
   let block = [], eid = 0;
   function flush() {
     if (!block.length) return;
-    const bl = block.map(l=>l.trim()).filter(Boolean);
+    const bl = block.map(l => l.trim()).filter(Boolean);
     block = [];
     if (!bl.length) return;
     const loc = { name: bl[0] };
@@ -465,195 +558,227 @@ function parsePaste(text) {
       const l = bl[i];
       if (/^\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/.test(l) && !loc.phone) loc.phone = l;
       else if (/\d+.*\b[A-Z]{2}\b.*\d{5}/.test(l) || /\d+\s+\w+\s+(St|Ave|Blvd|Dr|Rd|Ln|Way|Ct|Pl)/i.test(l)) loc.address = l;
-      else if (/fax/i.test(l)) loc.fax = l.replace(/fax:?\s*/i,'');
-      else if (/\b(mon|tue|wed|thu|fri|sat|sun|am|pm|appointment)\b/i.test(l)) loc.hours = l;
-      else loc.notes = loc.notes ? loc.notes+'; '+l : l;
+      else if (/fax/i.test(l)) loc.fax = l.replace(/fax:?\s*/i, '');
+      else if (/\b(mon|tue|wed|thu|fri|sat|sun|daily|am|pm|appointment|hours|open)\b/i.test(l)) loc.hours = l;
+      else loc.notes = loc.notes ? loc.notes + '; ' + l : l;
     }
-    data.entries.push({ type:'location', id:++eid, data:loc });
+    data.entries.push({ type: 'location', id: ++eid, data: loc });
   }
   for (const raw of lines) {
     const l = raw.trim();
-    if (/^TITLE:\s*/i.test(l)) { data.title = l.replace(/^TITLE:\s*/i,''); continue; }
-    if (/^PHONE:\s*/i.test(l)) { data.phone = l.replace(/^PHONE:\s*/i,''); continue; }
-    if (/^SUBTITLE:\s*/i.test(l)) { data.subtitle = l.replace(/^SUBTITLE:\s*/i,''); continue; }
-    if (/^SUBTEXT:\s*/i.test(l)) { data.subtext = l.replace(/^SUBTEXT:\s*/i,''); continue; }
-    if (/^SMARTPHRASE:\s*/i.test(l)) { data.name = l.replace(/^SMARTPHRASE:\s*/i,''); continue; }
-    if (/^FOOTER:\s*/i.test(l)) { data.footer = l.replace(/^FOOTER:\s*/i,''); continue; }
-    if (/^TAGLINE:\s*/i.test(l)) { data.tagline = l.replace(/^TAGLINE:\s*/i,''); continue; }
-    if (/^---/.test(l)) { flush(); const t = l.replace(/^---\s*(SECTION:?\s*)?/i,'').trim(); data.entries.push({type:'section',id:++eid,data:{title:t}}); continue; }
+    if (/^TITLE:\s*/i.test(l)) { data.title = l.replace(/^TITLE:\s*/i, ''); continue; }
+    if (/^PHONE:\s*/i.test(l)) { data.phone = l.replace(/^PHONE:\s*/i, ''); continue; }
+    if (/^SMARTPHRASE:\s*/i.test(l)) { data.name = l.replace(/^SMARTPHRASE:\s*/i, ''); continue; }
+    if (/^FOOTER:\s*/i.test(l)) { data.footer = l.replace(/^FOOTER:\s*/i, ''); continue; }
+    if (/^---/.test(l)) { flush(); const t = l.replace(/^---\s*(SECTION:?\s*)?/i, '').trim(); data.entries.push({ type: 'section', id: ++eid, data: { title: t } }); continue; }
     if (!l) { flush(); continue; }
     block.push(l);
   }
   flush();
   return data;
 }
+
 function parseAndGenerate() {
   const text = document.getElementById('paste-input').value;
-  if (!text.trim()) { showStatus('paste-status','Nothing to parse.','error'); return; }
+  if (!text.trim()) { showStatus('paste-status', 'Nothing to parse.', 'error'); return; }
   const data = parsePaste(text);
-  if (!data.entries.length) { showStatus('paste-status','No locations found.','error'); return; }
+  if (!data.entries.length) { showStatus('paste-status', 'No locations found.', 'error'); return; }
   lastBuildData = data; buildExcel(data);
-  showStatus('paste-status', data.entries.filter(e=>e.type==='location').length+' locations, '+data.entries.filter(e=>e.type==='section').length+' sections. Excel downloading.','success');
+  const lc = data.entries.filter(e => e.type === 'location').length;
+  const sc = data.entries.filter(e => e.type === 'section').length;
+  showStatus('paste-status', lc + ' location' + (lc !== 1 ? 's' : '') + (sc ? ', ' + sc + ' section' + (sc !== 1 ? 's' : '') : '') + '. Downloading.', 'success');
 }
+
 function parseAndPreview() {
   const text = document.getElementById('paste-input').value;
-  if (!text.trim()) { showStatus('paste-status','Nothing to parse.','error'); return; }
+  if (!text.trim()) { showStatus('paste-status', 'Nothing to parse.', 'error'); return; }
   lastBuildData = parsePaste(text);
   renderPreviewFromData(lastBuildData); switchTab('preview'); hideStatus('paste-status');
 }
+
 function clearPaste() { document.getElementById('paste-input').value = ''; hideStatus('paste-status'); }
+
 function generateFromForm() {
   const data = gatherFormData();
-  if (!data.title && !data.entries.filter(e=>e.type==='location'&&e.data.name).length) { showStatus('form-status','Add a title and at least one location.','error'); return; }
-  lastBuildData = data; buildExcel(data); hideStatus('form-status'); showToast('Excel file downloaded!');
+  if (!data.title && !data.entries.filter(e => e.type === 'location' && e.data.name).length) {
+    showStatus('form-status', 'Add a title and at least one location.', 'error'); return;
+  }
+  lastBuildData = data; buildExcel(data); hideStatus('form-status'); showToast('Excel downloaded');
 }
+
 function generateFromPreview() {
-  if (!lastBuildData) { showToast('No data — use Form or Paste first.'); return; }
-  buildExcel(lastBuildData); showToast('Excel file downloaded!');
+  if (!lastBuildData) { showToast('No data — use Build or Paste first.'); return; }
+  buildExcel(lastBuildData); showToast('Excel downloaded');
 }
+
 // ===== PREVIEW =====
 function renderPreview() { lastBuildData = gatherFormData(); renderPreviewFromData(lastBuildData); }
+
 function renderPreviewFromData(data) {
   const c = document.getElementById('preview-container');
-  const locs = data.entries.filter(e=>e.type==='location'&&e.data.name);
-  if (!locs.length && !data.title) { c.innerHTML = '<p style="color:var(--text-light);font-style:italic;">No content yet.</p>'; return; }
-  const cs = data.cols||2;
+  const locs = data.entries.filter(e => e.type === 'location' && e.data.name);
+  if (!locs.length && !data.title) { c.innerHTML = '<p style="color:var(--text-tertiary);font-style:italic;">No content yet.</p>'; return; }
   let h = '<table class="preview-table">';
-  if (data.title) h += '<tr><td class="hdr" colspan="'+cs+'">'+esc2(data.title)+'</td></tr>';
-  if (data.phone) h += '<tr><td class="ph" colspan="'+cs+'"><span>'+esc2(data.phone)+'</span></td></tr>';
-  if (data.subtitle) h += '<tr><td class="sub" colspan="'+cs+'">'+esc2(data.subtitle)+'</td></tr>';
-  if (data.subtext) h += '<tr><td class="stx" colspan="'+cs+'">'+esc2(data.subtext)+'</td></tr>';
+  if (data.title) h += '<tr><td class="hdr" colspan="2">' + esc2(data.title) + '</td></tr>';
+  if (data.phone) h += '<tr><td class="ph" colspan="2"><span>' + esc2(data.phone) + '</span></td></tr>';
   let buf = [];
   function flush() {
-    if (cs===2) { for(let i=0;i<buf.length;i+=2) h+='<tr><td>'+fmtLoc(buf[i])+'</td><td>'+(buf[i+1]?fmtLoc(buf[i+1]):'')+'</td></tr>'; }
-    else buf.forEach(l => { h+='<tr><td>'+fmtLoc(l)+'</td></tr>'; });
-    buf=[];
+    for (let i = 0; i < buf.length; i += 2) {
+      h += '<tr><td class="loc-cell">' + fmtLoc(buf[i]) + '</td><td class="loc-cell">' + (buf[i + 1] ? fmtLoc(buf[i + 1]) : '') + '</td></tr>';
+    }
+    buf = [];
   }
   data.entries.forEach(e => {
-    if (e.type==='section') { flush(); h+='<tr><td class="sec" colspan="'+cs+'">'+esc2(e.data.title)+'</td></tr>'; }
+    if (e.type === 'section') { flush(); h += '<tr><td class="sec" colspan="2">' + esc2(e.data.title) + '</td></tr>'; }
     else if (e.data.name) buf.push(e.data);
   });
   flush();
-  if (data.footer) h+='<tr><td class="ftr" colspan="'+cs+'">'+esc2(data.footer)+'</td></tr>';
-  if (data.tagline) h+='<tr><td class="tag" colspan="'+cs+'">'+esc2(data.tagline)+'</td></tr>';
-  h+='</table>';
+  if (data.footer) h += '<tr><td class="ftr" colspan="2">' + esc2(data.footer) + '</td></tr>';
+  h += '</table>';
   c.innerHTML = h;
 }
+
 function fmtLoc(l) {
   let h = '';
-  if (l.name) h += '<span class="ln">'+esc2(l.name)+'</span><br>';
-  if (l.address) h += esc2(l.address)+'<br>';
-  if (l.phone) h += '<span class="lp">'+esc2(l.phone)+'</span><br>';
-  if (l.fax) h += 'Fax: '+esc2(l.fax)+'<br>';
-  if (l.hours) h += esc2(l.hours)+'<br>';
-  if (l.notes) h += '<em>'+esc2(l.notes)+'</em>';
+  if (l.name) h += '<span class="loc-line ln">' + esc2(l.name) + '</span>';
+  if (l.address) h += '<span class="loc-line">' + esc2(l.address) + '</span>';
+  if (l.phone) h += '<span class="loc-line lp">' + esc2(l.phone) + '</span>';
+  if (l.fax) h += '<span class="loc-line">Fax: ' + esc2(l.fax) + '</span>';
+  if (l.hours) h += '<span class="loc-line">' + esc2(l.hours) + '</span>';
+  if (l.notes) h += '<span class="loc-line" style="font-style:italic">' + esc2(l.notes) + '</span>';
   return h;
 }
-// ===== EXCEL BUILDER (ExcelJS) =====
+
+// ===== EXCEL BUILDER (v2: cell-level formatting, no richText) =====
+//
+// KEY CHANGE: Instead of cramming all location data into one cell via richText,
+// each location gets multiple rows (name, address, phone, hours, notes) with
+// formatting applied directly to each cell. This survives Epic paste.
+//
 async function buildExcel(data) {
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'ClinForge AVS Generator';
+  wb.creator = 'ClinForge AVS Generator v2.0';
   const ws = wb.addWorksheet('AVS');
-  const cols = data.cols || 2;
-  // Column widths
-  if (cols === 2) {
-    ws.getColumn(1).width = 48;
-    ws.getColumn(2).width = 48;
-  } else {
-    ws.getColumn(1).width = 96;
-  }
-  const BORDER = {
+
+  // Column widths — 2-column layout
+  ws.getColumn(1).width = 48;
+  ws.getColumn(2).width = 48;
+
+  const BORDER_THIN = {
     top: { style: 'thin', color: { argb: 'FFCCCCCC' } },
     bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } },
     left: { style: 'thin', color: { argb: 'FFCCCCCC' } },
     right: { style: 'thin', color: { argb: 'FFCCCCCC' } }
   };
-  function addMerged(text, style) {
-    const r = ws.addRow(cols===2 ? [text,''] : [text]);
-    if (cols===2) ws.mergeCells(r.number, 1, r.number, 2);
+  const WRAP_CENTER = { horizontal: 'center', vertical: 'middle', wrapText: true };
+  const WRAP_TOP = { wrapText: true, vertical: 'top' };
+
+  // Helper: merged header row
+  function addHeader(text, style) {
+    const r = ws.addRow([text, '']);
+    ws.mergeCells(r.number, 1, r.number, 2);
     const cell = r.getCell(1);
-    cell.border = BORDER;
-    cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
-    if (style==='title') {
-      cell.font = { name:'Arial', size:14, bold:true, color:{argb:'FFFFFFFF'} };
-      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF0E2640'} };
-      r.height = 36;
-    } else if (style==='phone') {
-      cell.font = { name:'Arial', size:12, bold:true, color:{argb:'FF0000FF'} };
-      r.height = 24;
-    } else if (style==='subtitle') {
-      cell.font = { name:'Arial', size:11, bold:true };
+    cell.alignment = WRAP_CENTER;
+    if (style === 'title') {
+      cell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0E2640' } };
+      cell.border = BORDER_THIN;
+      r.height = 32;
+    } else if (style === 'phone') {
+      cell.font = { name: 'Arial', size: 12, bold: true, color: { argb: 'FF0000FF' } };
+      cell.border = BORDER_THIN;
       r.height = 22;
-    } else if (style==='subtext') {
-      cell.font = { name:'Arial', size:10, italic:true, color:{argb:'FF4A4A5A'} };
-      r.height = 20;
-    } else if (style==='section') {
-      cell.font = { name:'Arial', size:11, bold:true };
-      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFD9D9D9'} };
-      r.height = 28;
-    } else if (style==='footer') {
-      cell.font = { name:'Arial', size:9, color:{argb:'FF4A4A5A'} };
-      r.height = 20;
-    } else if (style==='tagline') {
-      cell.font = { name:'Arial', size:10, bold:true, italic:true };
+    } else if (style === 'section') {
+      cell.font = { name: 'Arial', size: 11, bold: true };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } };
+      cell.border = BORDER_THIN;
       r.height = 24;
+    } else if (style === 'footer') {
+      cell.font = { name: 'Arial', size: 9, color: { argb: 'FF666666' } };
+      cell.border = BORDER_THIN;
+      r.height = 20;
     }
     return r;
   }
-  function locRichText(loc) {
-    const parts = [];
-    if (loc.name) parts.push({ font:{name:'Arial',size:10,bold:true}, text:loc.name+'\n' });
-    if (loc.address) parts.push({ font:{name:'Arial',size:10}, text:loc.address+'\n' });
-    if (loc.phone) parts.push({ font:{name:'Arial',size:10,bold:true,color:{argb:'FF0000FF'}}, text:loc.phone+'\n' });
-    if (loc.fax) parts.push({ font:{name:'Arial',size:10}, text:'Fax: '+loc.fax+'\n' });
-    if (loc.hours) parts.push({ font:{name:'Arial',size:10}, text:loc.hours+'\n' });
-    if (loc.notes) parts.push({ font:{name:'Arial',size:10,italic:true}, text:loc.notes });
-    if (parts.length) { const last=parts[parts.length-1]; last.text=last.text.replace(/\n$/,''); }
-    return parts;
+
+  // Helper: build lines array for a location
+  function locLines(loc) {
+    const lines = [];
+    if (loc.name) lines.push({ text: loc.name, font: { name: 'Arial', size: 10, bold: true } });
+    if (loc.address) lines.push({ text: loc.address, font: { name: 'Arial', size: 10 } });
+    if (loc.phone) lines.push({ text: loc.phone, font: { name: 'Arial', size: 10, bold: true, color: { argb: 'FF0000FF' } } });
+    if (loc.fax) lines.push({ text: 'Fax: ' + loc.fax, font: { name: 'Arial', size: 10 } });
+    if (loc.hours) lines.push({ text: loc.hours, font: { name: 'Arial', size: 10 } });
+    if (loc.notes) lines.push({ text: loc.notes, font: { name: 'Arial', size: 10, italic: true } });
+    return lines;
   }
-  function addLocRow(a, b) {
-    const r = ws.addRow(cols===2 ? ['',''] : ['']);
-    r.height = 85;
-    const cA = r.getCell(1);
-    if (a && a.name) cA.value = { richText: locRichText(a) };
-    cA.alignment = { wrapText:true, vertical:'top' };
-    cA.border = BORDER;
-    if (cols === 2) {
-      const cB = r.getCell(2);
-      if (b && b.name) cB.value = { richText: locRichText(b) };
-      cB.alignment = { wrapText:true, vertical:'top' };
-      cB.border = BORDER;
+
+  // Helper: write a pair of locations side-by-side, one row per line
+  function addLocPair(locA, locB) {
+    const linesA = locLines(locA || {});
+    const linesB = locLines(locB || {});
+    const maxRows = Math.max(linesA.length, linesB.length, 1);
+    for (let i = 0; i < maxRows; i++) {
+      const r = ws.addRow(['', '']);
+      r.height = 16;
+      const cellA = r.getCell(1);
+      const cellB = r.getCell(2);
+      const isFirst = (i === 0);
+      const isLast = (i === maxRows - 1);
+      const borderA = {
+        left: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+        right: { style: 'hair', color: { argb: 'FFDDDDDD' } },
+        top: isFirst ? { style: 'thin', color: { argb: 'FFCCCCCC' } } : undefined,
+        bottom: isLast ? { style: 'thin', color: { argb: 'FFCCCCCC' } } : undefined,
+      };
+      const borderB = {
+        left: { style: 'hair', color: { argb: 'FFDDDDDD' } },
+        right: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+        top: isFirst ? { style: 'thin', color: { argb: 'FFCCCCCC' } } : undefined,
+        bottom: isLast ? { style: 'thin', color: { argb: 'FFCCCCCC' } } : undefined,
+      };
+      cellA.border = borderA;
+      cellB.border = borderB;
+      cellA.alignment = WRAP_TOP;
+      cellB.alignment = WRAP_TOP;
+      if (linesA[i]) {
+        cellA.value = linesA[i].text;
+        cellA.font = linesA[i].font;
+      }
+      if (linesB[i]) {
+        cellB.value = linesB[i].text;
+        cellB.font = linesB[i].font;
+      }
     }
   }
-  // ===== BUILD =====
-  if (data.title) addMerged(data.title, 'title');
-  if (data.phone) addMerged(data.phone, 'phone');
-  if (data.subtitle) addMerged(data.subtitle, 'subtitle');
-  if (data.subtext) addMerged(data.subtext, 'subtext');
-  if (data.title||data.phone||data.subtitle||data.subtext) {
-    const sp = ws.addRow(cols===2?['','']:['']);
-    sp.height = 6;
-  }
+
+  // ===== BUILD SHEET =====
+  if (data.title) addHeader(data.title, 'title');
+  if (data.phone) addHeader(data.phone, 'phone');
+
   let buf = [];
   function flush() {
-    if (cols===2) { for(let i=0;i<buf.length;i+=2) addLocRow(buf[i], buf[i+1]||null); }
-    else buf.forEach(l => addLocRow(l, null));
+    for (let i = 0; i < buf.length; i += 2) {
+      addLocPair(buf[i], buf[i + 1] || null);
+    }
     buf = [];
   }
+
   data.entries.forEach(e => {
-    if (e.type==='section') { flush(); addMerged(e.data.title||'', 'section'); }
+    if (e.type === 'section') { flush(); addHeader(e.data.title || '', 'section'); }
     else if (e.data.name) buf.push(e.data);
   });
   flush();
-  if (data.footer) addMerged(data.footer, 'footer');
-  if (data.tagline) addMerged(data.tagline, 'tagline');
+
+  if (data.footer) addHeader(data.footer, 'footer');
+
   // ===== DOWNLOAD =====
   const buffer = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = (data.name||'.wwavsoutput').replace(/^\./,'') + '.xlsx';
+  a.download = (data.name || '.wwavsoutput').replace(/^\./, '') + '.xlsx';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
