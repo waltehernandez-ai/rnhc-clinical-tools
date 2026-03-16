@@ -10,6 +10,7 @@ Personal clinical reference and productivity tools for primary care.
 |------|---------|-------------|
 | [Cystatin C Ordering Decision Tool](https://waltehernandez-ai.github.io/rnhc-clinical-tools/cystatin-c.html) | v2.3 | Guideline-based ordering algorithm, CKD-EPI 2021 eGFR calculator |
 | [Command Center](https://waltehernandez-ai.github.io/rnhc-clinical-tools/command-center.html) | v3.1 | Productivity dashboard with concurrent patient timers, complexity tracking, finish-time projections |
+| [Nabla Setup Tool](https://waltehernandez-ai.github.io/rnhc-clinical-tools/nabla-setup.html) | v2.0 | Generate custom Nabla Copilot instructions via note analysis, questionnaire, or troubleshooter |
 
 ## Disclaimer
 

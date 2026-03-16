@@ -1,5 +1,18 @@
 # Changelog
 
+## [2026-03-16] nabla-setup.html v2.0
+- Added Nabla Setup Tool to ClinForge
+- Note Style Analyzer: paste de-identified notes, AI detects documentation patterns
+- Build from Scratch: step-by-step questionnaire for General, HPI, PE, A&P, Results
+- Section Troubleshooter: paste current instructions + describe problem, AI suggests fix
+- Pattern Advisor: learns from saved output history
+- BYOK (Bring Your Own Key): direct browser-to-Anthropic API via CORS
+- Output history with localStorage persistence
+- ClinForge design system integration
+
+## [2026-03-16] index.html
+- Added Nabla Setup Tool card to Available Tools section
+
 ## [2026-03-16] command-center.html v3.1
 - Initial deployment
 - Concurrent patient timers with pause/resume/switch
